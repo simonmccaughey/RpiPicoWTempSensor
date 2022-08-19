@@ -11,7 +11,8 @@ class TempSensor(object):
   
   def __init__(self, callback=None):
     self.log = logging.getLogger('TempSensor')
-    ow = OneWire(Pin(0))
+    self.log.info("starting...")
+    ow = OneWire(Pin(22))
 
     self.callback = callback
     self.ds = DS18X20(ow)
@@ -42,9 +43,9 @@ class TempSensor(object):
     while self.roms is None or len(self.roms) == 0:
       try:
         await asyncio.sleep_ms(1000)
-        self.roms = self.ds.scan()
         self.log.info('Scanning for ROMs')
-        #print("found " , self.roms)
+        self.roms = self.ds.scan()
+        self.log.info("found " + str(self.roms))
         
       except Exception as e:
         self.log.error("Exception reading ROMs:" + str(e))
@@ -70,7 +71,7 @@ class TempSensor(object):
           counter = counter + 1
           need_to_report = False
           
-          if(temp not in self.last_temps):
+          if(temp not in self.last_temps and temp is not None):
             need_to_report = True
             self.last_temps.insert(0, temp)
             if(len(self.last_temps) > 5):
@@ -84,10 +85,10 @@ class TempSensor(object):
           self.log.debug('counter : ' + str(counter) + ', need to report : ' + str(need_to_report)) 
           if(need_to_report):
             if self.callback is not None:
-              self.log.debug('reporting...')
+              self.log.info('reporting...' + temp)
               #print("calling loop")
-              self.loop.call_soon(self.callback, temp)
-            self.log.debug('reported')
+              #callback(temp)
+              self.log.debug('reported')
             
       except Exception as e:
         self.log.warning("Unexpected error:" +  str(e))
@@ -95,17 +96,28 @@ class TempSensor(object):
         self.log.warning("Super-Unexpected error:")
           #pass
       #print('')
-  
+  async def run_callback():
+    print('')
 
 def my_callback(temp):
   print('>>>>> ' + temp)
-
+  
+def mysleep():
+  await asyncio.sleep_ms(1000)
 
 if __name__ == "__main__":
-  #from tempsensor import TempSensor
-  sensor = TempSensor(my_callback)
+  #reset the event loop (otherwise lots of tasks run at the same time)
+  ##NOTE: currently not working - do a soft reset between runs
   loop = asyncio.get_event_loop()
+  loop.close()
+  
+  #optionally configure extra logging
+  #logging.basicConfig(level=logging.DEBUG)
+  sensor = TempSensor(my_callback)
+  
   loop.run_forever()
+
+
 
 
 
