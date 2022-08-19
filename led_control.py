@@ -4,10 +4,12 @@ import uasyncio as asyncio
 
 import time 
 from machine import Timer
+import ulogging as logging
 
 class LedBlinker:
   
   def __init__(self):
+    self.log = logging.getLogger('LedBlinker')
     self.timer = Timer()  
     self.timer.init(period=100,mode=Timer.PERIODIC, callback=self.callback)  
     self.led=Pin("LED", machine.Pin.OUT)
@@ -33,11 +35,11 @@ class LedBlinker:
     self.on()
     
   def blink_fast(self):
-    print('Blink fast')
+    self.log.info('Blink fast')
     self.blink_period = 200
     
   def blink_slow(self):
-    print('Blink slow')
+    self.log.info('Blink slow')
     self.blink_period = 500
     
   def callback(self, arg):
@@ -56,7 +58,7 @@ class LedBlinker:
     
   def close(self):
     self.timer.deinit()
-    print('Cancel blink timer')
+    self.log.info('Cancel blink timer')
 
 
 if __name__ == "__main__":
