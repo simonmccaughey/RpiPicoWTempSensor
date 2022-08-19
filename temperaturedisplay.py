@@ -97,11 +97,11 @@ if __name__ == "__main__":
   display.temperature(23.2)
   #display.temperature_set('12.4')
   display.status('Off')
-  display.cb(3)
-  #display.time('12:34')
-  #display.text('On/10:23 ', 0,0, 0)
+  #display.cb(3)
+  display.time('12:34')
+  display.text('On/10:23 ', 0,0, 0)
   #display.text('Off until 11:33', 0,0)
-  #display.text('t=24.5', 0,57)
+  display.text('t=24.5', 0,57)
   #display.text('22:33', 89,57)
 
   #display.text('Off/11:44', 0,0, 1)
@@ -109,6 +109,7 @@ if __name__ == "__main__":
   #display.text('On/10:23                                  ', 0,0, 0)
 
   #display.status('On', '12:22')
+
 
 
 
