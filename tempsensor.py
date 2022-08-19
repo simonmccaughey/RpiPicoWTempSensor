@@ -84,11 +84,7 @@ class TempSensor(object):
             need_to_report = True
           self.log.debug('counter : ' + str(counter) + ', need to report : ' + str(need_to_report)) 
           if(need_to_report):
-            if self.callback is not None:
-              self.log.info('reporting...' + temp)
-              #print("calling loop")
-              #callback(temp)
-              self.log.debug('reported')
+            self.loop.create_task(self.run_callback(temp))
             
       except Exception as e:
         self.log.warning("Unexpected error:" +  str(e))
@@ -96,8 +92,12 @@ class TempSensor(object):
         self.log.warning("Super-Unexpected error:")
           #pass
       #print('')
-  async def run_callback():
-    print('')
+  async def run_callback(self, temp):
+    if self.callback is not None:
+      self.log.info('reporting...' + temp)
+      #print("calling loop")
+      self.callback(temp)
+      self.log.debug('reported')
 
 def my_callback(temp):
   print('>>>>> ' + temp)
