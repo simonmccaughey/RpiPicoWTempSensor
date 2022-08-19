@@ -94,7 +94,11 @@ class Web:
     
   def reboot(self):
     loop = asyncio.get_event_loop()
-    loop.call_later(1, machine.reset, )
+    loop.create_task(self.do_reboot())
+    
+  async def do_reboot(self):
+    await asyncio.sleep_ms(1000)
+    machine.reset()
     
 
 myWs = Web()
@@ -158,6 +162,7 @@ if __name__ == "__main__":
      loop.stop()
      loop.close()
     
+
 
 
 
