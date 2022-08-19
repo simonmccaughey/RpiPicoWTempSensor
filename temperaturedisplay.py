@@ -8,9 +8,9 @@ import freesans34_num
 class TemperatureDisplay(object):
  
   #pin 5 is D1 and pin 4 is D2
-  def __init__(self, sda_pin_num=5, scl_pin_num=4):
+  def __init__(self, sda_pin_num=8, scl_pin_num=9):
     print('Opening I2C using sda=' + str(sda_pin_num) + ', scl=' + str(scl_pin_num))
-    self.i2c = I2C(sda=Pin(sda_pin_num, machine.Pin.OUT), scl=Pin(scl_pin_num, machine.Pin.OUT))
+    self.i2c = I2C(0, sda=Pin(sda_pin_num, machine.Pin.OUT), scl=Pin(scl_pin_num, machine.Pin.OUT))
     scan = self.i2c.scan()
     print('I2C Bus: ' + str(scan))
     
@@ -108,6 +108,8 @@ if __name__ == "__main__":
   #display.text('On/10:23                                  ', 0,0, 0)
 
   #display.status('On', '12:22')
+
+
 
 
 
