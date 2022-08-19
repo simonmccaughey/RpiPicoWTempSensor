@@ -3,19 +3,20 @@ import machine
 from machine import I2C, Pin
 from writer import Writer
 import freesans34_num
-
+import ulogging as logging
 
 class TemperatureDisplay(object):
  
   #pin 5 is D1 and pin 4 is D2
   def __init__(self, sda_pin_num=8, scl_pin_num=9):
-    print('Opening I2C using sda=' + str(sda_pin_num) + ', scl=' + str(scl_pin_num))
+    self.log = logging.getLogger('Display')
+    self.log.info('Opening I2C using sda=' + str(sda_pin_num) + ', scl=' + str(scl_pin_num))
     self.i2c = I2C(0, sda=Pin(sda_pin_num, machine.Pin.OUT), scl=Pin(scl_pin_num, machine.Pin.OUT))
     scan = self.i2c.scan()
-    print('I2C Bus: ' + str(scan))
+    self.log.info('I2C Bus: ' + str(scan))
     
     if len(scan) == 0:
-      print('No screen detected')
+      self.log.info('No screen detected')
       self.display = None
     else:
       self.display = SSD1306_I2C(128, 64, self.i2c)
@@ -75,7 +76,7 @@ class TemperatureDisplay(object):
 
   def text(self, text, x, y, col=1):
     if self.display is None:
-      print('Fake display text: ', text)
+      self.log.info('Fake display text: ', text)
     else:
       fill_col = 1 - col
       self.display.fill_rect(x, y, len(text)*8, 8, fill_col)
