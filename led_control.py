@@ -11,19 +11,20 @@ class LedBlinker:
   def __init__(self):
     self.log = logging.getLogger('LedBlinker')
     self.timer = Timer()  
-    self.timer.init(period=100,mode=Timer.PERIODIC, callback=self.callback)  
-    self.led=Pin("LED", machine.Pin.OUT)
+    
+    self.timer.init(period=100,mode=Timer.PERIODIC, callback=lambda self.callback)  
+    self.led=Pin("LED", Pin.OUT)
     self.blink_period = -1
     self.state = 0
     
   #on and off take a second argument, so that internal 
   #functions can call them without changing the mode
   def on(self, period=-1):
-    self.led.value( 0)
+    self.led.value(1)
     self.blink_period = period
   
   def off(self, period=-1):
-    self.led.value( 1)
+    self.led.value(0)
     self.blink_period = period
   
 # Blink the LED leaving it in the desired final state
