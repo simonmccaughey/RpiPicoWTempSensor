@@ -6,12 +6,13 @@ from machine import WDT
 
 import uasyncio as asyncio
 from config import Config
+import ulogging as logging
+
 
 class TcpClient:
-
-  
   
   def __init__(self, callback=None, status_callback=None, cb=None):
+    self.log = logging.getLogger('TcpClient')
     config =  Config()
     self.cb = cb
     self.cb(10)
@@ -46,7 +47,7 @@ class TcpClient:
     self.update_status()
     
     
-    print('Client initialised')
+    self.log.info('Client initialised')
     self.cb(20)
     
 
@@ -72,7 +73,7 @@ class TcpClient:
   
   def do_connect(self):
     if not self.sta_if.isconnected():
-        print('connecting to network...')
+        self.log.info('connecting to network...')
         self.cb(10)
         self.wifi()
         #wait a maximum number of times before failing
@@ -82,7 +83,7 @@ class TcpClient:
           self.cb(11)
           await asyncio.sleep(0)
           time.sleep_ms(200)
-    print('network config:', self.sta_if.ifconfig())
+    self.log.info('network config:' + str(self.sta_if.ifconfig()))
     self.cb(12)
     self.ip = self.sta_if.ifconfig()[0]
     self.cb(13)
@@ -114,7 +115,7 @@ class TcpClient:
     try:
   
       #TODO - send proper status for wifi / client disconnection
-      print('Starting...', self.host, self.port)
+      self.log.info('Starting...' + str(self.host)  + ':' + str(self.port))
       self.update_status()
       self.do_connect()
       self.update_status()
@@ -133,14 +134,14 @@ class TcpClient:
             self.do_connect()
           self.update_status()
 
-          print('Trying to connect to ' + str(addr))
+          self.log.info('Trying to connect to ' + str(addr))
           #display.status(str(addr))
           self.s = socket.socket()
           self.s.connect(addr)
       
           #TODO - client name here should be a single string
           self.s.write("ClientName %s-%s\n" % (self.client_name, self.zone))
-          print('Connected!')
+          self.log.info('Connected!')
           #send an ack to get the time straight away
           self.send("ACK time\n")
           self.cb(51)
@@ -176,7 +177,7 @@ class TcpClient:
           self.cb(83)
 
           #this happens if the WIFI disconnects, or if the socket disconnects
-          print('environment exception : ' + str(e) + ' Wifi:' + str(self.sta_if.isconnected()))
+          self.log.info('environment exception : ' + str(e) + ' Wifi:' + str(self.sta_if.isconnected()))
           
           self.update_status()
           self.cb(84)
@@ -194,7 +195,7 @@ class TcpClient:
       if self.s is not None:
         self.s.close()
         self.cb(87)
-      print('All done!')
+      self.log.info('All done!')
 
           
 def rx(line):
@@ -211,7 +212,7 @@ if __name__ == "__main__":
   c = TcpClient(rx, cb=cb)
   
   loop = asyncio.get_event_loop()
-  asyncio.set_debug(False)
+  #asyncio.set_debug(False)
   loop.run_forever()
 
 
