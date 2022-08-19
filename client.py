@@ -2,7 +2,7 @@
 import network
 import usocket as socket
 import utime as time
-from watchdog import WDT
+from machine import WDT
 
 import uasyncio as asyncio
 from config import Config
@@ -28,8 +28,8 @@ class TcpClient:
     self.connected = False
     self.sta_if = network.WLAN(network.STA_IF)
     self.wifi()
-    #soft watchdog 10 minutes
-    self.wdt = WDT()
+    #soft watchdog 1 minute (NOTE: current max supported is about 8 seconds)
+    #self.wdt = WDT(timeout=60000)
     
 
     #self.sta_if.config(dhcp_hostname='Therm-%s' % self.zone)
@@ -163,7 +163,8 @@ class TcpClient:
               self.connected = True
               #tell the watchdog we are alive
               self.cb(80)
-              self.wdt.feed() 
+              ##TODO feed the dog
+              #self.wdt.feed() 
               self.callback(line)
               self.cb(81)
              
@@ -205,14 +206,14 @@ def cb(line):
 
 
 if __name__ == "__main__":
-  zone = 'Upstairs'
-
+  
   from client import TcpClient
   c = TcpClient(rx, cb=cb)
   
   loop = asyncio.get_event_loop()
   asyncio.set_debug(False)
   loop.run_forever()
+
 
 
 
