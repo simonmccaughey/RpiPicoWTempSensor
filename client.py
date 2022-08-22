@@ -27,34 +27,38 @@ class TcpClient:
     self.ip = None
     
     self.connected = False
-    self.sta_if = network.WLAN(network.STA_IF)
-    self.wifi()
+
+    self.s = None
+
+    self.loop = asyncio.get_event_loop()
+    
     #soft watchdog 1 minute (NOTE: current max supported is about 8 seconds)
     #self.wdt = WDT(timeout=60000)
     ##TODO use the real watchdog when it supports longer times
     self.wdt = WDT()
+    self.cb(11)
     
+    self.sta_if = network.WLAN(network.STA_IF)
+    self.wifi()
+    self.cb(12)
 
     #self.sta_if.config(dhcp_hostname='Therm-%s' % self.zone)
     
-    #set the access point ID (might not work)
+    #set the access point ID
     #a = network.WLAN(network.AP_IF)
     #a.config(essid='Thermostat-%s' % self.zone)
     #a.active(True)
     
-    self.loop = asyncio.get_event_loop()
+    self.cb(14)
     self.loop.create_task(self.run())
     self.loop.create_task(self.send_ack_loop())
-    
+
+    self.cb(15)
+
     self.update_status()
     
-    
-    self.log.info('Client initialised')
+    self.log.info('Init Complete.')
     self.cb(20)
-    
-
-    self.s = None
-    
 
   
   def close(self):
@@ -69,28 +73,38 @@ class TcpClient:
       self.status_callback(wifi, self.connected, self.ip)
   
   def wifi(self):
+    self.log.info('initialising wifi')
     self.sta_if.active(True)
     self.sta_if.connect(self.wireless_ssid, self.wireless_password)
+    self.log.info('initialising wifi completed')
     
   
-  def do_connect(self):
+  def run_initial_connection(self):
+    self.log.info('----------------------- do_connect starting')
     if not self.sta_if.isconnected():
-        self.log.info('connecting to network...')
-        self.cb(10)
-        self.wifi()
-        #wait a maximum number of times before failing
-        for x in xrange(100):
-          if self.sta_if.isconnected():
-            self.wdt.feed()
-            break;
-          self.cb(11)
-          await asyncio.sleep(0)
-          time.sleep_ms(200)
+      self.log.info('connecting to network...')
+      self.cb(10)
+      self.wifi()
+      #wait a maximum number of times before failing
+      counter = 100 
+      while counter > 0:
+        counter -= 1
+        print('looping...')
+        if self.sta_if.isconnected():
+          self.log.info('connected!!')
+          self.wdt.feed()
+          counter = 0
+          break;
+        self.cb(11)
+        self.log.info('>>>>>>>>>>>>>>>>>> wait for wifi')
+        await asyncio.sleep_ms(100)
+        time.sleep_ms(200)
     self.log.info('network config:' + str(self.sta_if.ifconfig()))
     self.cb(12)
     self.ip = self.sta_if.ifconfig()[0]
     self.cb(13)
-    
+    self.log.info('do_connect completed')
+
   async def send_ack_loop(self):
     #print("in ack block " + str(self.connected))
     while(True):
@@ -120,7 +134,11 @@ class TcpClient:
       #TODO - send proper status for wifi / client disconnection
       self.log.info('Starting...' + str(self.host)  + ':' + str(self.port))
       self.update_status()
-      self.do_connect()
+
+      self.log.info('do_connect starting z')
+    
+      self.run_initial_connection()
+      self.log.info('do_connect returned')
       self.update_status()
       self.cb(30)
      
@@ -134,7 +152,8 @@ class TcpClient:
           self.cb(50)
           self.update_status()
           if(self.sta_if.isconnected() == False):
-            self.do_connect()
+            self.log.info('Not connected...')
+            self.run_initial_connection()
           self.update_status()
 
           self.log.info('Trying to connect to ' + str(addr))
@@ -187,13 +206,12 @@ class TcpClient:
         finally:
           await asyncio.sleep_ms(5000)
           self.cb(85)
+    except Error as e:
+      self.log.info('exception : ' + str(e))
+          
     finally:
       #some stuff to do when the program exits
-      #turn the LED off
-      #led.value(1)
-      #Stop the timer, in case it's blinking
-      #tim.deinit()
-      #timer_temperature.deinit()
+      
       self.cb(86)
       if self.s is not None:
         self.s.close()
@@ -206,17 +224,21 @@ def rx(line):
 
 def cb(line):
   pass
-  #print('Handler: Received line: ' + str(line))
-
+  #print('DEBUG: Received line: ' + str(line))
+  
+def status_main(wifi_connected, client_connected, ip):
+  print('>>> Status : ' + str(wifi_connected) + ' - ' + str(client_connected))
+ 
 
 if __name__ == "__main__":
   
   from client import TcpClient
-  c = TcpClient(rx, cb=cb)
+  c = TcpClient(rx, status_main, cb=cb)
   
   loop = asyncio.get_event_loop()
   #asyncio.set_debug(False)
   loop.run_forever()
+
 
 
 

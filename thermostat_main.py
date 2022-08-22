@@ -43,7 +43,7 @@ class Thermostat:
     self.log.info('Display')
     self.display = TemperatureDisplay()
     #display the version briefly at startup
-    self.display.bottom_line_text('20190311 20:40')
+    self.display.bottom_line_text('20220822 12:44')
     
     #check if we are in non-start mode
     if(self.config.mode == '0'):
@@ -152,6 +152,9 @@ class Thermostat:
     status = ''
     self.status.wifi = wifi_connected
     self.status.client = client_connected
+    
+    self.log.info('>>> Status : ' + str(wifi_connected) + ' - ' + str(client_connected))
+    
     if client_connected is False:
       if wifi_connected is False:
         status = 'WiFi...'
@@ -166,8 +169,8 @@ class Thermostat:
           self.display.bottom_line_text(ip_address[-16:])
         
       self.display.status(status)
-      #TODO better error here...
-      self.log.info('Status : ' + str(wifi_connected) + ' - ' + str(client_connected))
+      
+    
   def print_status(self):
     while(True):
       await asyncio.sleep_ms(2000)
@@ -233,6 +236,7 @@ finally:
     time.sleep(1)
 
   machine.reset()
+
 
 
 
