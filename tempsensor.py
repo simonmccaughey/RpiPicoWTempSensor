@@ -39,11 +39,14 @@ class TempSensor(object):
     self.log.info('TempSensor: Stopping timer')
 
   async def run_temp_sensor(self):    
-    
+    counter = 0
     while self.roms is None or len(self.roms) == 0:
       try:
-        await asyncio.sleep_ms(1000)
-        self.log.info('Scanning for ROMs')
+        counter += 1
+        if(counter > 10):
+          await asyncio.sleep(10)
+        await asyncio.sleep(1)
+        self.log.info('Scanning for ROMs [attempt:' + str(counter) + ']')
         self.roms = self.ds.scan()
         self.log.info("found " + str(self.roms))
         
@@ -116,6 +119,7 @@ if __name__ == "__main__":
   sensor = TempSensor(my_callback)
   
   loop.run_forever()
+
 
 
 
