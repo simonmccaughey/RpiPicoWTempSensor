@@ -127,16 +127,8 @@ def reset(req, resp):
   
 @app.route('/favicon.ico')
 def fav(req, resp):
-  yield from app.sendfile(resp, "favicon.ico")
+  yield from app.sendfile(resp, "favicon.ico", content_type='image/x-icon')
 
-#@app.route('/favicon.ico')
-#def favicon(req, resp):
-#  yield from app.sendfile(resp, 'favicon.ico')
-
-
-  
-#register the favicon to get returned
-#ws.routefile('/favicon.ico', '/favicon.ico')
 
 def run():
   led = Pin(2, Pin.OUT)
@@ -162,6 +154,7 @@ if __name__ == "__main__":
      loop.stop()
      loop.close()
     
+
 
 
 
