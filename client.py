@@ -77,33 +77,6 @@ class TcpClient:
     self.sta_if.active(True)
     self.sta_if.connect(self.wireless_ssid, self.wireless_password)
     self.log.info('initialising wifi completed')
-    
-  
-  def run_initial_connection(self):
-    self.log.info('----------------------- do_connect starting')
-    if not self.sta_if.isconnected():
-      self.log.info('connecting to network...')
-      self.cb(10)
-      self.wifi()
-      #wait a maximum number of times before failing
-      counter = 100 
-      while counter > 0:
-        counter -= 1
-        print('looping...')
-        if self.sta_if.isconnected():
-          self.log.info('connected!!')
-          self.wdt.feed()
-          counter = 0
-          break;
-        self.cb(11)
-        self.log.info('>>>>>>>>>>>>>>>>>> wait for wifi')
-        await asyncio.sleep_ms(100)
-        time.sleep_ms(200)
-    self.log.info('network config:' + str(self.sta_if.ifconfig()))
-    self.cb(12)
-    self.ip = self.sta_if.ifconfig()[0]
-    self.cb(13)
-    self.log.info('do_connect completed')
 
   async def send_ack_loop(self):
     #print("in ack block " + str(self.connected))
@@ -134,12 +107,6 @@ class TcpClient:
       #TODO - send proper status for wifi / client disconnection
       self.log.info('Starting...' + str(self.host)  + ':' + str(self.port))
       self.update_status()
-
-      self.log.info('do_connect starting z')
-    
-      self.run_initial_connection()
-      self.log.info('do_connect returned')
-      self.update_status()
       self.cb(30)
      
       addr_info = socket.getaddrinfo(self.host, self.port)
@@ -153,7 +120,7 @@ class TcpClient:
           self.update_status()
           if(self.sta_if.isconnected() == False):
             self.log.info('Not connected...')
-            self.run_initial_connection()
+            
           self.update_status()
 
           self.log.info('Trying to connect to ' + str(addr))
