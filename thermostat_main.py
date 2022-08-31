@@ -192,6 +192,8 @@ class Thermostat:
       self.log.info('All done!')
 
 
+def exception_handler(loop, context):
+  log.error(f"Caught exception: {context['exception']}")
 
 try:
 
@@ -207,7 +209,8 @@ try:
   gc.collect()
   #import pico_web
   
-  #loop = asyncio.get_event_loop()
+  loop = asyncio.get_event_loop()
+  loop.set_exception_handler(exception_handler)
   #loop.run_forever()
   #gc.collect()
   print('import web...')
@@ -216,11 +219,11 @@ try:
   print('import completed')
   pico_web.myWs.set_status(t.status)
   pico_web.app.run(debug=True, host='0.0.0.0', port=80)
-except Exception as e:
+except BaseException as e:
   print('Exception : ' + str(e))
   print('E' + str(e.value))
   print('E' + str(e.errno))
-  raise e
+  raise
 except:
   print('Something else!')
   raise
@@ -236,6 +239,7 @@ finally:
     time.sleep(1)
 
   machine.reset()
+
 
 
 
