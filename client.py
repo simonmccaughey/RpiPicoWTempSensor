@@ -31,7 +31,7 @@ class TcpClient:
     self.s = None
 
     self.loop = asyncio.get_event_loop()
-    
+
     #soft watchdog 1 minute (NOTE: current max supported is about 8 seconds)
     #self.wdt = WDT(timeout=60000)
     ##TODO use the real watchdog when it supports longer times
@@ -72,8 +72,11 @@ class TcpClient:
       #print('CONN ' + str(self.connected))
       self.status_callback(wifi, self.connected, self.ip)
   
-  def wifi(self):
-    self.log.info('initialising wifi')
+  async def wifi(self):
+    self.log.info('=================>>>>  initialising wifi')
+    if not self.sta_if.isconnected():
+      self.sta_if.active(False)
+      await asyncio.sleep_ms(1000)
     self.sta_if.active(True)
     self.sta_if.connect(self.wireless_ssid, self.wireless_password)
     self.log.info('initialising wifi completed')
@@ -86,6 +89,7 @@ class TcpClient:
         self.cb(63)
         await asyncio.sleep_ms(1500)
         self.send("ACK time\n")
+        
         self.cb(64)
       except OSError as e:
         self.connected = False
@@ -108,9 +112,11 @@ class TcpClient:
       self.log.info('Starting...' + str(self.host)  + ':' + str(self.port))
       self.update_status()
       self.cb(30)
+      await self.wifi()
      
       addr_info = socket.getaddrinfo(self.host, self.port)
       addr = addr_info[0][-1]
+      wifi_iterations = 0
 
       while True:
         try:
@@ -120,6 +126,11 @@ class TcpClient:
           self.update_status()
           if(self.sta_if.isconnected() == False):
             self.log.info('Not connected...')
+            wifi_iterations += 1
+            if(wifi_iterations > 10):
+              wifi_iterations = 0
+              await self.wifi()
+              
             
           self.update_status()
 
@@ -136,12 +147,12 @@ class TcpClient:
           self.cb(51)
           sreader = asyncio.StreamReader(self.s)
           while True:
-            yield from asyncio.sleep(0)
+            await asyncio.sleep_ms(100)
             self.cb(60)
             self.update_status()
             self.cb(61)
             line = await sreader.readline()
-            #print('Recieved', line)
+            self.log.info('Recieved' + str(line))
             self.cb(70)
 
             line = line.decode('utf-8').rstrip()
@@ -190,19 +201,24 @@ def rx(line):
   print('Handler: Received line: ' + str(line))
 
 def cb(line):
-  pass
   #print('DEBUG: Received line: ' + str(line))
-  
+  pass
+
 def status_main(wifi_connected, client_connected, ip):
   print('>>> Status : ' + str(wifi_connected) + ' - ' + str(client_connected))
  
+def exception_handler(loop, context):
+  log = logging.getLogger('main')
+  log.error(f"Caught exception: {context['exception']}")
 
+ 
 if __name__ == "__main__":
   
   from client import TcpClient
   c = TcpClient(rx, status_main, cb=cb)
   
   loop = asyncio.get_event_loop()
+  loop.set_exception_handler(exception_handler)
   #asyncio.set_debug(False)
   loop.run_forever()
 
