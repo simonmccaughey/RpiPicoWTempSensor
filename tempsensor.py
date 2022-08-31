@@ -71,26 +71,28 @@ class TempSensor(object):
           temp = str(round(float(temp),1))
           self.log.debug('Last: ' + str(self.last_temps) + ' - now: ' + str(temp)) 
           #counter makes us send something around every minute, even if the temperature hasnt changed
-          counter = counter + 1
+          counter += 1
           need_to_report = False
           
           if(temp not in self.last_temps and temp is not None):
             need_to_report = True
             self.last_temps.insert(0, temp)
-            if(len(self.last_temps) > 5):
+            if(len(self.last_temps) > 10):
               self.last_temps.pop()
             #print('TempSensor: ' + temp, end=' ')
 
             #print('about to report', end=' ')
           if(counter > 60):
-            counter = 0
             need_to_report = True
+          
           self.log.debug('counter : ' + str(counter) + ', need to report : ' + str(need_to_report)) 
           if(need_to_report):
+            counter = 0
             self.loop.create_task(self.run_callback(temp))
-            
+
       except Exception as e:
         self.log.warning("Unexpected error:" +  str(e))
+        await asyncio.sleep_ms(500)
       except :
         self.log.warning("Super-Unexpected error:")
           #pass
@@ -119,6 +121,8 @@ if __name__ == "__main__":
   sensor = TempSensor(my_callback)
   
   loop.run_forever()
+
+
 
 
 
