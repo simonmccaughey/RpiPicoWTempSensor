@@ -45,9 +45,10 @@ class TcpClient:
     #self.sta_if.config(dhcp_hostname='Therm-%s' % self.zone)
     
     #set the access point ID
-    #a = network.WLAN(network.AP_IF)
-    #a.config(essid='Thermostat-%s' % self.zone)
-    #a.active(True)
+    self.ap = network.WLAN(network.AP_IF)
+    id = 'Thermostat-%s' % self.zone
+    self.ap.config(ssid=id, essid=id, password = '1029384756')
+    self.ap.active(True)
     
     self.cb(14)
     self.loop.create_task(self.run())
