@@ -12,6 +12,7 @@ from tempsensor import TempSensor
 from aswitch import Pushbutton
 
 from machine import Pin
+from machine import Timer
 #import utime as time
 
 from config import Config
@@ -57,7 +58,7 @@ class Thermostat:
     self.sensor = TempSensor(self.read_temp)
     
     self.client = None
-
+    
     #D0	16
     #D1	5
     #D2	4
@@ -78,8 +79,9 @@ class Thermostat:
     self.display.status('Starting...')
     self.log.info('TCP Client')
     self.client = TcpClient(self.text_received, self.status_update, self.cb)
-    loop = asyncio.get_event_loop()
-    loop.create_task(self.print_status())
+    self.loop = asyncio.get_event_loop()
+    self.loop.create_task(self.uptime())
+    self.loop.create_task(self.print_status())
   
   def press(self, p):
     print('Button pressed!! ', p)
@@ -170,8 +172,15 @@ class Thermostat:
         
       self.display.status(status)
       
-    
-  def print_status(self):
+  async def uptime(self):
+    minutes = 0
+    while(True):
+      await asyncio.sleep(60)
+      minutes += 1
+      self.log.info('Uptime: ' + '{:02d}h:{:02d}m'.format(*divmod(minutes, 60)))
+      
+        
+  async def print_status(self):
     while(True):
       await asyncio.sleep_ms(2000)
       self.status.screen = self.display.display_status()
@@ -239,6 +248,7 @@ finally:
     time.sleep(1)
 
   machine.reset()
+
 
 
 
