@@ -127,7 +127,14 @@ def reset(req, resp):
   
 @app.route('/favicon.ico')
 def fav(req, resp):
-  yield from app.sendfile(resp, "favicon.ico", content_type='image/x-icon')
+  yield from picoweb.start_response(resp)
+  try:
+    with open("favicon.ico", 'rb') as img_binary:
+      img = img_binary.read()
+    yield from resp.awrite(img)
+  except Exception:
+    print("Image file not found.")
+    pass
 
 
 def run():
@@ -154,6 +161,7 @@ if __name__ == "__main__":
      loop.stop()
      loop.close()
     
+
 
 
 
