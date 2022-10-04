@@ -68,15 +68,17 @@ class TemperatureDisplay(object):
       
 
   def status(self, error):
-    self.text(error + '                                  ', 0,0, 0)
+    formatted = f'{error}                                  '
+    self.text(formatted, 0, 0, 0)
 
 
   def time(self, time):
     self.text(time, 89,57)
 
   def text(self, text, x, y, col=1):
+    print('====================')
     if self.display is None:
-      self.log.info('Fake display text: ', text)
+      self.log.info(f'Fake display text: {text}')
     else:
       fill_col = 1 - col
       self.display.fill_rect(x, y, len(text)*8, 8, fill_col)
@@ -109,6 +111,7 @@ if __name__ == "__main__":
   #display.text('On/10:23                                  ', 0,0, 0)
 
   #display.status('On', '12:22')
+
 
 
 
