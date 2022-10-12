@@ -1,7 +1,24 @@
 
 
 get latest micropython, and install it
+Automated install:
+
+make sure the command mpremote is working, and connects to the correct serial port
+
+then run these commands:
+
+mpremote  cp *.py favicon.ico config.json :/
+mpremote fs mkdir lib
+mpremote  cp modules/*.py :/lib/
+mpremote run hints/installation.py
+
+
+
+Manual instructions:
 
 follow the instructions in hints/installation.py to install upip packages
 copy modules/*.py into device lib folder
 copy the remainder of the *.py files from this dir to the device root folder. Also copy config json and favicon file
+
+
+
