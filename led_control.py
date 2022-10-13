@@ -4,7 +4,7 @@ import uasyncio as asyncio
 
 import time 
 from machine import Timer
-import ulogging as logging
+import logging
 
 class LedBlinker:
   

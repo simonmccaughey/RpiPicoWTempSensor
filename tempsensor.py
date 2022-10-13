@@ -5,7 +5,7 @@ from onewire import OneWire
 from machine import Pin
 import uasyncio as asyncio
 
-import ulogging as logging
+import logging
 
 class TempSensor(object):
   

@@ -6,7 +6,7 @@ from watchdog import WDT
 
 import uasyncio as asyncio
 from config import Config
-import ulogging as logging
+import logging
 
 
 class TcpClient:

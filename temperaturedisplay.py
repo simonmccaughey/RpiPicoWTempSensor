@@ -3,7 +3,7 @@ import machine
 from machine import I2C, Pin
 from writer import Writer
 import freesans34_num
-import ulogging as logging
+import logging
 
 class TemperatureDisplay(object):
  

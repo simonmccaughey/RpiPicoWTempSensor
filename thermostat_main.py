@@ -21,7 +21,7 @@ from status import Status
 import sys
 
 
-import ulogging as logging
+import logging
 import network
 
 
