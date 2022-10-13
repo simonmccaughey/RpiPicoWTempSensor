@@ -10,8 +10,10 @@ then run these commands:
 mpremote  cp *.py favicon.ico config.json :/
 mpremote fs mkdir lib
 mpremote  cp modules/*.py :/lib/
+##NOTE: connect to network first
 mpremote run hints/installation.py
-
+##NOTE: Extra step required because picoweb tries to import ulogging - updated code to use 'logging' instead
+mpremote cp ./modules/picoweb/__init__.py :/lib/picoweb/__init__.py
 
 
 Manual instructions:
