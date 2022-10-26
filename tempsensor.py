@@ -12,7 +12,7 @@ class TempSensor(object):
   def __init__(self, callback=None):
     self.log = logging.getLogger('TempSensor')
     self.log.info("starting...")
-    ow = OneWire(Pin(22))
+    ow = OneWire(Pin(22, Pin.IN, Pin.PULL_UP))
 
     self.callback = callback
     self.ds = DS18X20(ow)
@@ -50,7 +50,7 @@ class TempSensor(object):
         self.roms = self.ds.scan()
         self.log.info("found " + str(self.roms))
         
-      except Exception as e:
+      except BaseException as e:
         self.log.error("Exception reading ROMs:" + str(e))
         
     
@@ -90,7 +90,7 @@ class TempSensor(object):
             counter = 0
             self.loop.create_task(self.run_callback(temp))
 
-      except Exception as e:
+      except BaseException as e:
         self.log.warning("Unexpected error:" +  str(e))
         await asyncio.sleep_ms(500)
       except :

@@ -101,7 +101,7 @@ class Thermostat:
       #print('about to send', end=' ')
       self.client.send("TempRead %s %s\n" % (self.zone, temp))
       self.log.info('sent : ' + str(temp))
-    except Exception as e:
+    except BaseException as e:
       self.log.warning("Unexpected error:" + str(e))
     except :
       self.log.warning("Super-Unexpected error:")

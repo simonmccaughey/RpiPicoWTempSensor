@@ -133,7 +133,6 @@ class TcpClient:
               wifi_iterations = 0
               await self.wifi()
               
-            
           self.update_status()
 
           self.log.info('Trying to connect to ' + str(addr))
@@ -144,6 +143,7 @@ class TcpClient:
           #TODO - client name here should be a single string
           self.s.write("ClientName %s-%s\n" % (self.client_name, self.zone))
           self.log.info('Connected!')
+          self.log.info('' + str(self.sta_if.ifconfig()))
           #send an ack to get the time straight away
           self.send("ACK time\n")
           self.cb(51)
@@ -186,8 +186,9 @@ class TcpClient:
         finally:
           await asyncio.sleep_ms(5000)
           self.cb(85)
-    except Error as e:
-      self.log.info('exception : ' + str(e))
+    except BaseException as e:
+      self.log.info(f'Exception : {e} ' + str(e))
+      raise e
           
     finally:
       #some stuff to do when the program exits
