@@ -1,23 +1,41 @@
 
 
-get latest micropython, and install it
+get latest micropython, and install it on the board 
+ - plug board in, shows up as USB drive, then just copy the firmware to the USB drive
+
+
+make sure the command mpremote is working 
+to install:
+ - pip install --user mpremote 
+ - add the installed location to PATH, 
+
+run mpremote and check it connects to the correct serial port
+
 Automated install:
-
-make sure the command mpremote is working, and connects to the correct serial port
-
-then run these commands:
 
 mpremote  cp *.py favicon.ico config.json :/
 mpremote fs mkdir lib
-mpremote  cp modules/*.py :/lib/
-##NOTE: connect to network first
+mpremote cp modules/*.py :/lib/
+
+#connect to network first using:
+mpremote run hints/network.py
+
+#run automated installation of modules (NOTE: if you get network errors, reboot the device)
 mpremote run hints/installation.py
-##NOTE: Extra step required because picoweb tries to import ulogging - updated code to use 'logging' instead
+
+##NOTE: Extra steps required because picoweb tries to import ulogging - updated code to use 'logging' instead
+#copy the mip installed file to local
+mpr cp :/lib/picoweb/__init__.py modules/picoweb/
+#replace the import with the alias import
+sed -i 's/import ulogging/import logging as ulogging/' modules/picoweb/__init__.py
+#put the updated file back on the device
 mpremote cp ./modules/picoweb/__init__.py :/lib/picoweb/__init__.py
+
 
 
 Manual instructions:
 
+follow the instructions in hints/network.py to connect to wifi
 follow the instructions in hints/installation.py to install upip packages
 copy modules/*.py into device lib folder
 copy the remainder of the *.py files from this dir to the device root folder. Also copy config json and favicon file
