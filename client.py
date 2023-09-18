@@ -38,6 +38,8 @@ class TcpClient:
     self.wdt = WDT()
     self.cb(11)
     
+    #set the network hostname
+    network.hostname(config.zone)
     self.sta_if = network.WLAN(network.STA_IF)
     self.wifi()
     self.cb(12)
@@ -47,9 +49,9 @@ class TcpClient:
     #set the access point ID
     ap = network.WLAN(network.AP_IF)
     ap.active(False)
-    #id = f'Thermostat_{self.zone}' 
-    #ap.config(ssid=id, essid=id, password = '1029384756')
-    #ap.active(True)
+    id = f'Thermostat_{self.zone}' 
+    ap.config(ssid=id, essid=id, password = '1029384756')
+    ap.active(True)
     
     self.cb(14)
     self.loop.create_task(self.run())
@@ -72,7 +74,13 @@ class TcpClient:
       wifi = self.sta_if.isconnected()
       #print('wifi ' + str(wifi))
       #print('CONN ' + str(self.connected))
-      self.status_callback(wifi, self.connected, self.ip)
+      ip = None
+      if wifi:
+        ip = self.sta_if.ifconfig()[0]
+      #print(f'callback: {wifi}, {self.connected}, {ip}')
+      ##NOTE this returns no output if there is something wrong in the code of the callback
+      self.status_callback(wifi, self.connected, ip)
+      #print(f'callback completed.............{self.status_callback}')
   
   async def wifi(self):
     self.log.info('=================>>>>  initialising wifi')
@@ -97,7 +105,6 @@ class TcpClient:
         self.connected = False
         self.cb(65)
       
-
   def send(self, text):
     #print('client send...' + str(self.connected))
     if self.connected:
