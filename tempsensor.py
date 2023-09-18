@@ -18,7 +18,7 @@ class TempSensor(object):
     self.callback = callback
     self.ds = DS18X20(ow)
     self.roms = None
-    self.log.info("scanning for 1-wire devices...")
+    print("scanning for 1-wire devices...")
     
     #TODO make this write a sensible error when no device is found
     #self.timer_temperature = Timer(3)
@@ -41,7 +41,7 @@ class TempSensor(object):
 
   def close(self):
     #self.timer_temperature.deinit()
-    self.log.info('TempSensor: Stopping timer')
+    print('TempSensor: Stopping timer')
 
   async def run_temp_sensor(self):    
     counter = 0
@@ -51,9 +51,9 @@ class TempSensor(object):
         if(counter > 10):
           await asyncio.sleep(10)
         await asyncio.sleep(1)
-        self.log.info('Scanning for ROMs [attempt:' + str(counter) + ']')
+        print('Scanning for ROMs [attempt:' + str(counter) + ']')
         self.roms = self.ds.scan()
-        self.log.info("found " + str(self.roms))
+        print("found " + str(self.roms))
         
       except BaseException as e:
         self.log.error("Exception reading ROMs:" + str(e))
