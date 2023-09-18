@@ -76,7 +76,7 @@ class TemperatureDisplay(object):
     self.text(time, 89,57)
 
   def text(self, text, x, y, col=1):
-    print('====================')
+    print(f'[Display]: {text}')
     if self.display is None:
       self.log.info(f'Fake display text: {text}')
     else:
