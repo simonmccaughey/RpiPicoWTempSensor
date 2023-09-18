@@ -44,8 +44,8 @@ class Thermostat:
     self.log.info('Display')
     self.display = TemperatureDisplay()
     #display the version briefly at startup
-    self.display.bottom_line_text('20230918 08:48')
-    
+    self.display.bottom_line_text('20230918 13:50')
+  
     #check if we are in non-start mode
     if(self.config.mode == '0'):
       self.display.status('Connect mode')
@@ -148,32 +148,33 @@ class Thermostat:
         self.status.state = parts[2]
 
   def status_update(self, wifi_connected, client_connected, ip):
-    
-    
     #NOTE: sometimes wifi status is reported as False even when 
     #      the client is connected and working perfectly
+    #NOTE this returns no output if there is something wrong in the code - it just fails silently
+      
+    #print(f'>>> Status : {wifi_connected} - {client_connected} (ip:{ip})')
+    
     status = ''
     self.status.wifi = wifi_connected
     self.status.client = client_connected
-    
-    self.log.info('>>> Status : ' + str(wifi_connected) + ' - ' + str(client_connected))
-    
+
+    #print the IP to the screen, but only the first time we receive it
+    if ip is not None and self.status.ip is None:
+      self.status.ip = ip
+      #print it a load of times, if another event comes in, it will overwrite it.
+      for x in range(60):
+        self.display.bottom_line_text(f'{ip}         ')
     if client_connected is False:
       if wifi_connected is False:
         status = 'WiFi...'
         self.led.blink_fast()
       else:
+
         status = 'Client...'
         self.led.blink_slow()
-        #print('Display: ', display)
-        #print('ip :     ', ip)
-        if ip is not None:
-          ip_address = '    ' + ip
-          self.display.bottom_line_text(ip_address[-16:])
-          print('---------------')
-          await asyncio.sleep(3)
       self.display.status(status)
-      
+    #print('=== callback complete ===')
+
   async def uptime(self):
     minutes = 0
     while(True):

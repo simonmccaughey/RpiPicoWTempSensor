@@ -1,9 +1,7 @@
 
 
-
 class Status:
-  
-  
+
   def __init__(self):
     self.wifi = None
     self.client = None
@@ -14,7 +12,8 @@ class Status:
     self.time = None
     self.screen = None
     self.sensor = None
+    self.ip = None
     
   def fields(self):
-    return ['wifi', 'client', 'last_time', 'set_temp', 'temp', 'state', 'time', 'screen', 'sensor']
+    return ['wifi', 'client', 'last_time', 'set_temp', 'temp', 'state', 'time', 'screen', 'sensor', 'ip']
 
