@@ -14,6 +14,7 @@ class TempSensor(object):
     self.log.info("starting...")
     ow = OneWire(Pin(22, Pin.IN, Pin.PULL_UP))
 
+    self.auto_report = True
     self.callback = callback
     self.ds = DS18X20(ow)
     self.roms = None
@@ -25,7 +26,11 @@ class TempSensor(object):
     self.last_temps = []
     self.loop = asyncio.get_event_loop()
     self.loop.create_task(self.run_temp_sensor())
-    
+
+  #turn auto report off to switch to one minute max reporting
+  def auto_report(self, true_or_false):
+    self.auto_report = true_or_false
+  
   def set_debug():
     log.setLevel(logging.DEBUG)
     
@@ -74,14 +79,19 @@ class TempSensor(object):
           counter += 1
           need_to_report = False
           
-          if(temp not in self.last_temps and temp is not None):
-            need_to_report = True
-            self.last_temps.insert(0, temp)
-            if(len(self.last_temps) > 10):
-              self.last_temps.pop()
-            #print('TempSensor: ' + temp, end=' ')
+          #print(f'Self auto report : {self.auto_report}')
+          ##NOTE auto report looks boolean, but is actually string.
+          if(self.auto_report == 'True'):
+            #print('in autoreport block')
+            if(temp not in self.last_temps and temp is not None):
+              #print('in new temperature block')
+              need_to_report = True
+              self.last_temps.insert(0, temp)
+              if(len(self.last_temps) > 10):
+                self.last_temps.pop()
+              #print('TempSensor: ' + temp, end=' ')
 
-            #print('about to report', end=' ')
+              #print('about to report', end=' ')
           if(counter > 60):
             need_to_report = True
           

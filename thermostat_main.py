@@ -44,7 +44,7 @@ class Thermostat:
     self.log.info('Display')
     self.display = TemperatureDisplay()
     #display the version briefly at startup
-    self.display.bottom_line_text('20220822 12:44')
+    self.display.bottom_line_text('20230918 08:48')
     
     #check if we are in non-start mode
     if(self.config.mode == '0'):
@@ -56,6 +56,7 @@ class Thermostat:
     
     self.log.info('Sensor')
     self.sensor = TempSensor(self.read_temp)
+    self.sensor.auto_report = self.config.auto_report
     
     self.client = None
     
@@ -93,12 +94,12 @@ class Thermostat:
 
   def read_temp(self, temp):
     
-    #print('temperatures:', end=' ')
+    print('temperatures:', end=' ')
     try:
-      #print(temp, end=' ')
+      print(temp, end=' ')
       self.display.temperature(temp)
       self.status.temp = temp
-      #print('about to send', end=' ')
+      print('about to send', end=' ')
       self.client.send("TempRead %s %s\n" % (self.zone, temp))
       self.log.info('sent : ' + str(temp))
     except BaseException as e:
@@ -106,7 +107,7 @@ class Thermostat:
     except :
       self.log.warning("Super-Unexpected error:")
         #pass
-    #print('')
+    print('')
 
   def button_pressed(self, pin):
     
@@ -169,7 +170,8 @@ class Thermostat:
         if ip is not None:
           ip_address = '    ' + ip
           self.display.bottom_line_text(ip_address[-16:])
-        
+          print('---------------')
+          await asyncio.sleep(3)
       self.display.status(status)
       
   async def uptime(self):

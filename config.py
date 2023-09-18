@@ -12,6 +12,7 @@ class Config:
   client_name = None
   zone = None
   mode = None
+  auto_report = True
       
 
 	
@@ -68,7 +69,7 @@ class Config:
 
 
   def fields(self):
-    return ['wifi_ssid', 'wifi_password', 'host', 'port', 'client_name', 'zone', 'mode']
+    return ['wifi_ssid', 'wifi_password', 'host', 'port', 'client_name', 'zone', 'mode', 'auto_report']
 
 
 if __name__ == "__main__":
