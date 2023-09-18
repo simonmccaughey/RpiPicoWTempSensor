@@ -25,7 +25,7 @@ mpremote run hints/installation.py
 
 ##NOTE: Extra steps required because picoweb tries to import ulogging - updated code to use 'logging' instead
 #copy the mip installed file to local
-mpr cp :/lib/picoweb/__init__.py modules/picoweb/
+mpremote cp :/lib/picoweb/__init__.py modules/picoweb/
 #replace the import with the alias import
 sed -i 's/import ulogging/import logging as ulogging/' modules/picoweb/__init__.py
 #put the updated file back on the device
