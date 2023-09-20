@@ -44,7 +44,7 @@ class Thermostat:
     self.log.info('Display')
     self.display = TemperatureDisplay()
     #display the version briefly at startup
-    self.display.bottom_line_text('20230918 13:50')
+    self.display.bottom_line_text('230920 0745 no ap')
   
     #check if we are in non-start mode
     if(self.config.mode == '0'):

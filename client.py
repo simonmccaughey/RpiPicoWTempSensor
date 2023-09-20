@@ -49,9 +49,9 @@ class TcpClient:
     #set the access point ID
     ap = network.WLAN(network.AP_IF)
     ap.active(False)
-    id = f'Thermostat_{self.zone}' 
-    ap.config(ssid=id, essid=id, password = '1029384756')
-    ap.active(True)
+    #id = f'Thermostat_{self.zone}' 
+    #ap.config(ssid=id, essid=id, password = '1029384756')
+    #ap.active(True)
     
     self.cb(14)
     self.loop.create_task(self.run())
