@@ -10,7 +10,7 @@ sta_if.ifconfig()
 
 ap = network.WLAN(network.AP_IF)
 ap.active(False)
-id = f'Thermostat_XXX' 
-ap.config(ssid=id, essid=id, password = '1029384756')
-ap.active(True)
+#id = f'Thermostat_XXX' 
+#ap.config(ssid=id, essid=id, password = '1029384756')
+#ap.active(True)
 
