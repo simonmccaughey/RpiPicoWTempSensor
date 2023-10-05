@@ -45,7 +45,7 @@ class TcpClient:
     self.cb(12)
 
     #self.sta_if.config(dhcp_hostname='Therm-%s' % self.zone)
-    
+    ## NOTE: enabling AP can bleed .4.x addresses onto network - dont do it!   
     #set the access point ID
     ap = network.WLAN(network.AP_IF)
     ap.active(False)
