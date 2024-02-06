@@ -41,6 +41,8 @@ class TcpClient:
     #set the network hostname
     network.hostname(config.zone)
     self.sta_if = network.WLAN(network.STA_IF)
+    ##reset the network config (helps if the module thinks it has a .4.* address)
+    self.sta_if.ifconfig(('0.0.0.0', '0.0.0.0', '0.0.0.0', '0.0.0.0'))
     self.wifi()
     self.cb(12)
 
