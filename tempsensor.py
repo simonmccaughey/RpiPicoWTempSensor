@@ -79,9 +79,9 @@ class TempSensor(object):
           counter += 1
           need_to_report = False
           
-          #print(f'Self auto report : {self.auto_report}')
+          #print(f'Self auto report : {self.auto_report} temp:{temp} [{self.last_temps}]')
           ##NOTE auto report looks boolean, but is actually string.
-          if(self.auto_report == 'True'):
+          if(str(self.auto_report) == 'True'):
             #print('in autoreport block')
             if(temp not in self.last_temps and temp is not None):
               #print('in new temperature block')
@@ -94,6 +94,8 @@ class TempSensor(object):
               #print('about to report', end=' ')
           if(counter > 60):
             need_to_report = True
+          #For debug - force report every time
+          # need_to_report = True
           
           self.log.debug('counter : ' + str(counter) + ', need to report : ' + str(need_to_report)) 
           if(need_to_report):
@@ -127,7 +129,7 @@ if __name__ == "__main__":
   loop.close()
   
   #optionally configure extra logging
-  #logging.basicConfig(level=logging.DEBUG)
+  logging.basicConfig(level=logging.DEBUG)
   sensor = TempSensor(my_callback)
   
   loop.run_forever()
