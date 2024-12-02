@@ -46,12 +46,14 @@ class TemperatureDisplay(object):
       # writes the reading as text in the white rectangle
       display.set_pen(BLACK)
       display.set_font("sans")
-      display.text("{:.1f}".format(temperature) + "c", 10, 15, scale=1)
+      display.text(f"{temperature}", 10, 15, scale=1)
 
       # time to update the display
       display.update()
     
   def temperature_set(self, temperature):
+    if self.display is None:
+      return
     temp = round(float(temperature),1)
     if temp == -999.0:
       t = 'none'
@@ -77,6 +79,8 @@ class TemperatureDisplay(object):
 
   def bottom_line_text(self, text):
     # self.text(text, 0,57)
+    if self.display is None:
+      return
     self.log.info(f'TODO : display bottom line text : {text}')
     display = self.display
     BLACK = display.create_pen(0, 0, 0)
@@ -93,6 +97,8 @@ class TemperatureDisplay(object):
     display.update()
     
   def showprogram(self, on_off, time):
+    if self.display is None:
+      return
     #invert the colour if it is 'On'
     col = 0 if on_off == 'On' else 1
     #put a load of spaces along the display to colour it in
@@ -121,10 +127,12 @@ class TemperatureDisplay(object):
 
   def status(self, error):
     formatted = f'{error}                                  '
-    self.text(formatted, 0, 0, 0)
+    #self.text(formatted, 0, 0, 0)
 
 
   def time(self, time):
+    if self.display is None:
+      return
     #self.text(time, 89,57)
     self.log.info(f'TODO : display  time : {time}')
     display = self.display
@@ -142,6 +150,8 @@ class TemperatureDisplay(object):
     display.update()
 
   def text(self, text, x, y, col=1):
+    if self.display is None:
+      return
     print(f'[Display]: {text}')
     if self.display is None:
       self.log.info(f'Fake display text: {text}')
