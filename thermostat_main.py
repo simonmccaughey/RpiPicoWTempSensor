@@ -26,11 +26,22 @@ class Thermostat:
   def __init__(self):
     self.log = logging.getLogger('main')
     self.log.info('starting ')
+
+    print("Memory before Status:", gc.mem_free())
+    gc.collect()
+    print("Memory before Status:", gc.mem_free())
+
     self.status = Status()
     self.log.info('Blinker')
+    print("Memory before LedBlinker:", gc.mem_free())
+    gc.collect()
+    print("Memory before LedBlinker:", gc.mem_free())
     self.led = LedBlinker()
     self.led.blink_fast()
     self.log.info('Config')
+    print("Memory before Config:", gc.mem_free())
+    gc.collect()
+    print("Memory before Config:", gc.mem_free())
     self.config =  Config()
 
     self.connected = False
@@ -38,6 +49,9 @@ class Thermostat:
 
     self.set_temp = 0
     self.log.info('Display')
+    print("Memory before TemperatureDisplay:", gc.mem_free())
+    gc.collect()
+    print("Memory before TemperatureDisplay:", gc.mem_free())
     self.display = TemperatureDisplay(self.zone)
     #display the version briefly at startup
     self.display.bottom_line_text('241202 2342 2.8 LCD')
@@ -52,6 +66,9 @@ class Thermostat:
 
     
     self.log.info('Sensor')
+    print("Memory before TempSensor:", gc.mem_free())
+    gc.collect()
+    print("Memory before TempSensor:", gc.mem_free())
     self.sensor = TempSensor(self.read_temp)
     self.sensor.auto_report = self.config.auto_report
     
@@ -255,7 +272,8 @@ finally:
   for x in range(10):
     print('.', end='')
     time.sleep(1)
-
+  
+  import machine
   machine.reset()
 
 

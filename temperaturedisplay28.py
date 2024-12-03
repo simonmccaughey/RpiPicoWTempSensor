@@ -1,11 +1,9 @@
 ## This is support for the pimorini 2.8 display (not touchscreen)
 
-import machine
 import time
 from pimoroni import RGBLED
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB332
 import logging
-import ntptime
 import time
 import gc
 #import webrepl
@@ -48,34 +46,11 @@ class TemperatureDisplay(object):
   def cb(self, n):
     self.log.info(f'TODO : display cb : {n}')
 
-  def get_ntp_time(self):
-    current_time = time.time()  # Get current time in seconds since boot
-    # Check if last fetch was within the last minute
-    if current_time - self.last_ntp_fetch_time < 60:
-      #print("Returning cached time:", self.last_formatted_date)
-      return self.last_formatted_date
-  
-    try:
-      print("Fetching NTP time...")
-      ntptime.settime()  # Sync with NTP server
-      local_time = time.localtime()
-
-      # Format the date
-      day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-      self.last_formatted_date = f"{day_names[local_time[6]]} {month_names[local_time[1] - 1]} {local_time[2]}"
-      self.last_ntp_fetch_time = current_time  # Update last fetch time
-      print("Formatted Date:", self.last_formatted_date)
-    except:
-      print("Failed to sync time. Returning last known date.")
-      # Optionally handle fallback here
-  
-    return self.last_formatted_date
 
 
   def refresh(self):
     gc.collect()
+    self.check_free_mem()
 
     if self.display is not None:
       display = self.display
@@ -219,7 +194,7 @@ class TemperatureDisplay(object):
       #########################################################################
       ##  Date / Day  Display
 
-      date_time = self.get_ntp_time()
+      date_time = self.last_formatted_date
       width = display.measure_text(date_time, scale=0.7)
       #print(f"width:{width}")
 
@@ -302,6 +277,17 @@ class TemperatureDisplay(object):
 
     self.refresh()
   
+  def check_free_mem(self):
+    import gc
+    gc.collect()
+    F = gc.mem_free()
+    A = gc.mem_alloc()
+    T = F + A
+    largest = gc.mem_free()  # Measure the largest free block
+    P = '{0:.2f}%'.format(F / T * 100)
+    print(f"Total RAM: {T} bytes")
+    print(f"Unused RAM: {F} bytes ({P} free)")
+    print(f"Largest Free Block: {largest} bytes")
 
   def connection_status(self, status_text):
     self.display_status_text = status_text
