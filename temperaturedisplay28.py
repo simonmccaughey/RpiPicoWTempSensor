@@ -7,14 +7,18 @@ from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB332
 import logging
 import ntptime
 import time
+import gc
+#import webrepl
+#webrepl.start()
 
 
 class TemperatureDisplay(object):
  
   #pin 5 is D1 and pin 4 is D2
-  def __init__(self):
+  def __init__(self, zone):
     self.log = logging.getLogger('Display28')
     self.log.info('Opening Display 2.8 pimorini=')
+    self.display_zone = zone
     self.display_temperature = "00.0"
     self.display_temperature_set = "none"
     self.display_bottom_line_text = ""
@@ -35,11 +39,11 @@ class TemperatureDisplay(object):
 
 
     ##TODO we can remove this clear and update
-    BLACK = self.display.create_pen(0, 0, 0)
-    self.display.set_pen(BLACK)
-    self.display.clear()
-    self.display.update()
-    self.refresh()
+    # BLACK = self.display.create_pen(0, 0, 0)
+    # self.display.set_pen(BLACK)
+    # self.display.clear()
+    # self.display.update()
+    # self.refresh()
       
   def cb(self, n):
     self.log.info(f'TODO : display cb : {n}')
@@ -71,6 +75,8 @@ class TemperatureDisplay(object):
 
 
   def refresh(self):
+    gc.collect()
+
     if self.display is not None:
       display = self.display
       BLACK = display.create_pen(0, 0, 0)
@@ -104,6 +110,22 @@ class TemperatureDisplay(object):
       display.set_pen(BACKGROUND)
       display.rectangle(9, 9, 320-18, 230-18)
       
+      #########################################################################
+      ## Zone name Display
+
+      # zone_text = self.display_zone
+      # width = display.measure_text(zone_text, scale=0.9)
+      # text_left = (320 // 2) - (width // 2)
+
+      # display.set_font("sans")
+      # display.set_pen(DARK)
+      # display.set_thickness(3)
+      # display.text(zone_text, text_left, 70, scale=0.9)
+      # display.set_pen(WHITE)
+      # display.set_thickness(2)
+      # display.text(zone_text, text_left, 70, scale=0.9)
+      # display.set_thickness(1)
+
 
       #########################################################################
       ## Temperature Display
@@ -115,27 +137,29 @@ class TemperatureDisplay(object):
       temperature_text = f"{self.display_temperature}"
       width = display.measure_text(temperature_text, scale=2)
       text_left = (320 // 2) - (width // 2) - 10
+      top = 105
       
       display.set_font("sans")
       #draw the degrees symbol
       display.set_pen(DARK)
       display.set_thickness(4)
-      display.text("o", 225, 75, scale=1)
+      display.text("o", 230, top-25, scale=1)
       display.set_pen(WHITE)
       display.set_thickness(3)
-      display.text("o", 225, 75, scale=1)
+      display.text("o", 230, top-25, scale=1)
       display.set_thickness(1)
 
       #draw the actual temperature text
+      scale = 2.2
       display.set_pen(DARK)
       display.set_thickness(9)
-      display.text(temperature_text, text_left, 100, scale=2)
+      display.text(temperature_text, text_left, top, scale=scale)
       display.set_pen(BACKGROUND)
       display.set_thickness(8)
-      display.text(temperature_text, text_left, 100, scale=2)
+      display.text(temperature_text, text_left, top, scale=scale)
       display.set_pen(WHITE)
       display.set_thickness(5)
-      display.text(temperature_text, text_left, 100, scale=2)
+      display.text(temperature_text, text_left, top, scale=scale)
       display.set_thickness(1)
 
       #########################################################################
@@ -153,10 +177,10 @@ class TemperatureDisplay(object):
       display.set_font("sans")
       display.set_pen(DARK)
       display.set_thickness(3)
-      display.text(target_text, text_left, 150, scale=0.8)
+      display.text(target_text, text_left, 152, scale=0.8)
       display.set_pen(WHITE)
       display.set_thickness(2)
-      display.text(target_text, text_left, 150, scale=0.8)
+      display.text(target_text, text_left, 152, scale=0.8)
       display.set_thickness(1)
 
       #########################################################################
@@ -172,7 +196,8 @@ class TemperatureDisplay(object):
 
       #########################################################################
       ##  Status text Display
-      self.tiny_status_text(self.display_status_text, top=232, left=2, width=100, height=10, right=None, foreground=WHITE, background=BLACK)
+      status_text = f'{self.display_zone}: {self.display_status_text}'
+      self.tiny_status_text(status_text, top=232, left=2, width=100, height=10, right=None, foreground=WHITE, background=BLACK)
 
       #########################################################################
       ##  Time  Display
@@ -329,7 +354,7 @@ class TemperatureDisplay(object):
 if __name__ == "__main__":
   import time
 
-  display = TemperatureDisplay()
+  display = TemperatureDisplay("Upstairs")
   display.temperature(13.2)
   display.temperature_set('12.4')
   display.connection_status('Startup')

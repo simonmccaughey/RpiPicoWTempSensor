@@ -9,8 +9,6 @@ from client import TcpClient
 from temperaturedisplay28 import TemperatureDisplay
 from tempsensor import TempSensor
 
-from machine import Pin
-from machine import Timer
 #import utime as time
 
 from config import Config
@@ -20,7 +18,7 @@ import sys
 
 
 import logging
-import network
+#import network
 
 
 class Thermostat:
@@ -40,7 +38,7 @@ class Thermostat:
 
     self.set_temp = 0
     self.log.info('Display')
-    self.display = TemperatureDisplay()
+    self.display = TemperatureDisplay(self.zone)
     #display the version briefly at startup
     self.display.bottom_line_text('241202 2342 2.8 LCD')
   
@@ -243,7 +241,10 @@ except:
   print('Something else!')
   raise
 finally:
-  t.tidy_up()
+  try:
+    t.tidy_up()
+  finally:
+    pass
   
   ##this code makes it auto reboot, but it also swallows errors
   ## maybe it should go in main??
