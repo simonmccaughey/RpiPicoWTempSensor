@@ -16,13 +16,15 @@ class TemperatureDisplay(object):
     self.log = logging.getLogger('Display28')
     self.log.info('Opening Display 2.8 pimorini=')
     self.display_temperature = "00.0"
-    self.display_temperature_set = "00.0"
+    self.display_temperature_set = "none"
     self.display_bottom_line_text = ""
     self.display_status_text = "Initialising"
-    self.display_time = "00:00"
-    self.display_on_off = "Off"
-    self.display_on_off_time = "00:01"
+    self.display_time = "--:--"
+    self.display_on_off = "???"
+    self.display_on_off_time = "00:00"
     self.display_day_of_week = "Sunday"
+    self.last_ntp_fetch_time = 0
+    self.last_formatted_date = "--- --- -"
 
     self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, rotate=180)
     self.display.set_backlight(0.8)
@@ -43,25 +45,29 @@ class TemperatureDisplay(object):
     self.log.info(f'TODO : display cb : {n}')
 
   def get_ntp_time(self):
-    formatted_date = "Mon Jan 1";
+    current_time = time.time()  # Get current time in seconds since boot
+    # Check if last fetch was within the last minute
+    if current_time - self.last_ntp_fetch_time < 60:
+      #print("Returning cached time:", self.last_formatted_date)
+      return self.last_formatted_date
+  
     try:
-      print("get NTP time")
-      ntptime.settime()
+      print("Fetching NTP time...")
+      ntptime.settime()  # Sync with NTP server
       local_time = time.localtime()
-
-      print("get NTP time OK")
 
       # Format the date
       day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-      formatted_date = f"{day_names[local_time[6]]} {month_names[local_time[1] - 1]} {local_time[2]}"
-      print("Formatted Date:", formatted_date)
+      self.last_formatted_date = f"{day_names[local_time[6]]} {month_names[local_time[1] - 1]} {local_time[2]}"
+      self.last_ntp_fetch_time = current_time  # Update last fetch time
+      print("Formatted Date:", self.last_formatted_date)
     except:
-      print("Failed to sync time")
-      # Optionally provide fallback date/time
-
-    return formatted_date
+      print("Failed to sync time. Returning last known date.")
+      # Optionally handle fallback here
+  
+    return self.last_formatted_date
 
 
   def refresh(self):
@@ -72,20 +78,31 @@ class TemperatureDisplay(object):
       BACKGROUND = display.create_pen(140, 208, 235)
       DARK = display.create_pen(38, 130, 160)
 
-      
+      # if self.display_on_off == 'On':
+      #   BACKGROUND = display.create_pen(235, 130, 120)
+      OUTSIDE_BORDER = display.create_pen(232, 241, 244)
+      BOTTOM_BAND = BLACK
+      PROG_BACKGROUND = BACKGROUND
+      if self.display_on_off == 'On':
+        #make the wee band be red
+        RED = display.create_pen(235, 0, 0)
+        OUTSIDE_BORDER = RED
+        BOTTOM_BAND = RED
+        PROG_BACKGROUND = RED
+
       # draw the background
-      display.set_pen(display.create_pen(232, 241, 244))
+      display.set_pen(OUTSIDE_BORDER)
       display.rectangle(1, 1, 320, 240)
       display.set_pen(display.create_pen(245, 248, 249))
-      display.rectangle(5, 5, 320-10, 240-10)
+      display.rectangle(5, 5, 320-10, 230-10)
       display.set_pen(display.create_pen(175, 208, 220))
-      display.rectangle(6, 6, 320-12, 240-12)
+      display.rectangle(6, 6, 320-12, 230-12)
       display.set_pen(DARK)
-      display.rectangle(7, 7, 320-14, 240-14)
+      display.rectangle(7, 7, 320-14, 230-14)
       display.set_pen(display.create_pen(175, 208, 220))
-      display.rectangle(8, 8, 320-16, 240-16)
+      display.rectangle(8, 8, 320-16, 230-16)
       display.set_pen(BACKGROUND)
-      display.rectangle(9, 9, 320-18, 240-18)
+      display.rectangle(9, 9, 320-18, 230-18)
       
 
       #########################################################################
@@ -109,8 +126,7 @@ class TemperatureDisplay(object):
       display.text("o", 225, 75, scale=1)
       display.set_thickness(1)
 
-
-      #draw the actual text
+      #draw the actual temperature text
       display.set_pen(DARK)
       display.set_thickness(9)
       display.text(temperature_text, text_left, 100, scale=2)
@@ -143,16 +159,20 @@ class TemperatureDisplay(object):
       display.text(target_text, text_left, 150, scale=0.8)
       display.set_thickness(1)
 
+      #########################################################################
+      ##  Bottom line text Display - black line
+      display.set_pen(BOTTOM_BAND)
+
+      display.rectangle(1, 230, 320, 240)
 
       #########################################################################
       ##  Bottom line text Display
       self.log.info(f'TODO : display bottom line text : {self.display_bottom_line_text}')
-
-      self.tiny_status_text(self.display_bottom_line_text, top=222, left=240, width=80, height=10, foreground=BLACK, background=BACKGROUND)
+      self.tiny_status_text(self.display_bottom_line_text, top=232, left=240, width=80, height=10, right=320, foreground=WHITE, background=BLACK)
 
       #########################################################################
       ##  Status text Display
-      self.tiny_status_text(self.display_status_text, top=222, left=20, width=100, height=10, foreground=BLACK, background=BACKGROUND)
+      self.tiny_status_text(self.display_status_text, top=232, left=2, width=100, height=10, right=None, foreground=WHITE, background=BLACK)
 
       #########################################################################
       ##  Time  Display
@@ -176,7 +196,7 @@ class TemperatureDisplay(object):
 
       date_time = self.get_ntp_time()
       width = display.measure_text(date_time, scale=0.7)
-      print(f"width:{width}")
+      #print(f"width:{width}")
 
       display.set_font("sans")
       display.set_pen(DARK)
@@ -187,8 +207,6 @@ class TemperatureDisplay(object):
       display.text(date_time, 310-width, 22, scale=0.7)
       display.set_thickness(1)
 
-
-
       #########################################################################
       ##  Program  Display
 
@@ -196,18 +214,29 @@ class TemperatureDisplay(object):
       on_off_text = ""
       if self.display_on_off_time == '00:00':
         #dont show the time if it is 00:00
-        on_off_text = "Off"
-      else:
+        on_off_text = self.display_on_off # use the actual value, as it might be startup text
+      elif self.display_on_off == "On":
+        on_off_text = f'{self.display_on_off} until {self.display_on_off_time}'
+      elif self.display_on_off == "Off":
         on_off_text = f'{self.display_on_off} until {self.display_day_of_week[0:3]} {self.display_on_off_time}'
       self.log.info(f'TODO : display prog : {on_off_text}')
 
-      # display.set_pen(WHITE)
-      # display.rectangle(10, 200, 230, 25)
+      width = display.measure_text(on_off_text, scale=0.8)
+      text_left = (320 // 2) - (width // 2)
 
-      # writes the reading as text in the white rectangle
-      display.set_pen(BLACK)
+      display.set_pen(PROG_BACKGROUND)
+      display.rectangle(text_left-5, 186, width+10, 28)
+      display.circle(text_left-5, 186+13, 13)
+      display.circle(text_left+width+5, 186+13, 13)
+
+
       display.set_font("sans")
-      display.text(on_off_text, 10, 200, scale=1)
+      display.set_pen(DARK)
+      display.set_thickness(3)
+      display.text(on_off_text, text_left, 200, scale=0.8)
+      display.set_pen(WHITE)
+      display.set_thickness(2)
+      display.text(on_off_text, text_left, 200, scale=0.8)
 
 
 
@@ -253,20 +282,24 @@ class TemperatureDisplay(object):
     self.display_status_text = status_text
     self.refresh()
 
-  def tiny_status_text(self, status_text, top, left, height, width, foreground, background, invert=False):
-    formatted = f'{status_text}                                  '
-    #self.text(formatted, 0, 0, 0)
+  def tiny_status_text(self, status_text, top, left, right, height, width, foreground, background, invert=False):
     display = self.display
     if invert:
       background, foreground = foreground, background
     display.set_pen(background)
+    display.set_font("bitmap8")
 
-    display.rectangle(left-10, top-1, width, height)
+    if right is not None:
+      ##this is right aligned text, figure out the width
+      width = display.measure_text(status_text, scale=1)
+      left = (right) - (width)
+      #print(f"for text {status_text} width:{width} left:{left}")
+
+    # display.rectangle(left-10, top-1, width, height)
 
     # writes the reading as text in the white rectangle
     display.set_pen(foreground)
-    display.set_font("bitmap8")
-    display.text(f"{status_text}", left, top, scale=1.0)
+    display.text(f"{status_text}", left, top, scale=1)
 
   def time(self, time):
     self.display_time = time
