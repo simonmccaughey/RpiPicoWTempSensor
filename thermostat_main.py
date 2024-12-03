@@ -36,7 +36,7 @@ class Thermostat:
     print("Memory before LedBlinker:", gc.mem_free())
     gc.collect()
     print("Memory before LedBlinker:", gc.mem_free())
-    self.led = LedBlinker()
+    self.led = LedBlinker(pin=28)
     self.led.blink_fast()
     self.log.info('Config')
     print("Memory before Config:", gc.mem_free())

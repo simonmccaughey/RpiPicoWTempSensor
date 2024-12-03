@@ -1,7 +1,7 @@
 ## This is support for the pimorini 2.8 display (not touchscreen)
 
 import time
-from pimoroni import RGBLED
+# from pimoroni import RGBLED
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB332
 import logging
 import time
@@ -25,23 +25,17 @@ class TemperatureDisplay(object):
     self.display_on_off = "???"
     self.display_on_off_time = "00:00"
     self.display_day_of_week = "Sunday"
-    self.last_ntp_fetch_time = 0
-    self.last_formatted_date = "--- --- -"
+    ##this is the format
+    # self.last_formatted_date = "Mon Nov 22"
+    self.last_formatted_date = "  "
 
     self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, rotate=180)
     self.display.set_backlight(0.8)
   
-    #for now turn the LED off
-    led = RGBLED(26, 27, 28)
-    led.set_rgb(0, 0, 0)
-
-
-    ##TODO we can remove this clear and update
-    # BLACK = self.display.create_pen(0, 0, 0)
-    # self.display.set_pen(BLACK)
-    # self.display.clear()
-    # self.display.update()
-    # self.refresh()
+    #for now turn the LED off (removed this for memory efficiency)
+    # led = RGBLED(26, 27, 28)
+    # led.set_rgb(0, 0, 0)
+    # self.led = led
       
   def cb(self, n):
     self.log.info(f'TODO : display cb : {n}')
@@ -283,11 +277,11 @@ class TemperatureDisplay(object):
     F = gc.mem_free()
     A = gc.mem_alloc()
     T = F + A
-    largest = gc.mem_free()  # Measure the largest free block
+    # largest = gc.mem_free()  # Measure the largest free block
     P = '{0:.2f}%'.format(F / T * 100)
-    print(f"Total RAM: {T} bytes")
+    # print(f"Total RAM: {T} bytes")
     print(f"Unused RAM: {F} bytes ({P} free)")
-    print(f"Largest Free Block: {largest} bytes")
+    # print(f"Largest Free Block: {largest} bytes")
 
   def connection_status(self, status_text):
     self.display_status_text = status_text
