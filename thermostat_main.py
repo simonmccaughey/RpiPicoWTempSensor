@@ -164,7 +164,8 @@ class Thermostat:
       self.status.ip = ip
       #print it a load of times, if another event comes in, it will overwrite it.
       for x in range(60):
-        self.display.bottom_line_text(f'{ip}         ')
+        #TODO I removed a load of spaces from the end of this - needs fixed for other screen
+        self.display.bottom_line_text(f'{ip}')
     if client_connected is False:
       if wifi_connected is False:
         status = 'WiFi...'
