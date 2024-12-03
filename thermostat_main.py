@@ -49,7 +49,7 @@ class Thermostat:
     self.set_temp = 0
     self.log.info('Display')
     #NOTE: we cant detect the 2.8 pimorini screen, so we just have to configure it
-    if self.config.screen28:
+    if str(self.config.screen28) == "True":
       print("import 2.8 <<<<<<<<<<<")
       from temperaturedisplay28 import TemperatureDisplay
     else:
