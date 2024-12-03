@@ -6,10 +6,8 @@ import gc
 
 import uasyncio as asyncio
 from client import TcpClient
-from temperaturedisplay import TemperatureDisplay
+from temperaturedisplay28 import TemperatureDisplay
 from tempsensor import TempSensor
-
-from aswitch import Pushbutton
 
 from machine import Pin
 from machine import Timer
@@ -44,11 +42,12 @@ class Thermostat:
     self.log.info('Display')
     self.display = TemperatureDisplay()
     #display the version briefly at startup
-    self.display.bottom_line_text('230920 0745 no ap')
+    self.display.bottom_line_text('241202 2342 2.8 LCD')
   
     #check if we are in non-start mode
     if(self.config.mode == '0'):
-      self.display.status('Connect mode')
+      ## NOTE used to be status()
+      self.display.connection_status('Connect mode')
       self.config.mode = 1;
       self.config.save()
       sys.exit()
@@ -77,7 +76,7 @@ class Thermostat:
     #self.setup(15, 4)
     #self.setup(2,  5)
     
-    self.display.status('Starting...')
+    self.display.connection_status('Starting...')
     self.log.info('TCP Client')
     self.client = TcpClient(self.text_received, self.status_update, self.cb)
     self.loop = asyncio.get_event_loop()
@@ -88,9 +87,9 @@ class Thermostat:
     print('Button pressed!! ', p)
 
   
-  def setup(self, gpio, no):
-    pin = Pin(gpio, Pin.IN, machine.Pin.PULL_UP)
-    pb = Pushbutton(pin, self.press, (no,))
+  # def setup(self, gpio, no):
+  #   pin = Pin(gpio, Pin.IN, machine.Pin.PULL_UP)
+  #   pb = Pushbutton(pin, self.press, (no,))
 
   def read_temp(self, temp):
     
@@ -146,6 +145,7 @@ class Thermostat:
         self.status.set_temp = self.set_temp
         self.status.time = time
         self.status.state = parts[2]
+        self.display.connection_status("Connected")
 
   def status_update(self, wifi_connected, client_connected, ip):
     #NOTE: sometimes wifi status is reported as False even when 
@@ -154,7 +154,7 @@ class Thermostat:
       
     #print(f'>>> Status : {wifi_connected} - {client_connected} (ip:{ip})')
     
-    status = ''
+    status = 'Connected'
     self.status.wifi = wifi_connected
     self.status.client = client_connected
 
@@ -172,7 +172,8 @@ class Thermostat:
 
         status = 'Client...'
         self.led.blink_slow()
-      self.display.status(status)
+      ##NOTE: used to be status()
+      self.display.connection_status(status)
     #print('=== callback complete ===')
 
   async def uptime(self):
