@@ -139,7 +139,8 @@ class Thermostat:
         self.log.debug('update display now')
         time = parts[3][0:5]
         self.log.info('program time : ' + time)
-        self.display.showprogram(parts[2], time)
+        ##TODO add Day as arg to other display, so it supports the arg (it can ignore it)
+        self.display.showprogram(parts[2], time, parts[4])
         self.set_temp = parts[6]
         self.display.temperature_set(self.set_temp)
         self.status.set_temp = self.set_temp
@@ -200,7 +201,7 @@ class Thermostat:
       self.sensor.close()
       self.client.close()
       self.led.close()
-      self.display.bottom_line_text('------')
+      self.display.connection_status('Program closed')
       
       self.log.info('All done!')
 
