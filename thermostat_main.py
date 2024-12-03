@@ -6,7 +6,6 @@ import gc
 
 import uasyncio as asyncio
 from client import TcpClient
-from temperaturedisplay28 import TemperatureDisplay
 from tempsensor import TempSensor
 
 #import utime as time
@@ -49,6 +48,13 @@ class Thermostat:
 
     self.set_temp = 0
     self.log.info('Display')
+    #NOTE: we cant detect the 2.8 pimorini screen, so we just have to configure it
+    if self.config.screen28:
+      print("import 2.8 <<<<<<<<<<<")
+      from temperaturedisplay28 import TemperatureDisplay
+    else:
+      print("import regular <<<<<<<<<<<")
+      from temperaturedisplay import TemperatureDisplay
     print("Memory before TemperatureDisplay:", gc.mem_free())
     gc.collect()
     print("Memory before TemperatureDisplay:", gc.mem_free())
