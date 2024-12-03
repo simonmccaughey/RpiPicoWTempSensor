@@ -40,12 +40,13 @@ class TemperatureDisplay(object):
       display = self.display
       BLACK = display.create_pen(0, 0, 0)
       WHITE = display.create_pen(255, 255, 255)
-      display.set_pen(WHITE)
+      display.set_pen(BLACK)
       display.rectangle(1, 1, 100, 25)
 
       # writes the reading as text in the white rectangle
-      display.set_pen(BLACK)
+      display.set_pen(WHITE)
       display.set_font("sans")
+      display.set_thickness(1)
       display.text(f"{temperature}", 10, 15, scale=1)
 
       # time to update the display
@@ -65,11 +66,11 @@ class TemperatureDisplay(object):
     display = self.display
     BLACK = display.create_pen(0, 0, 0)
     WHITE = display.create_pen(255, 255, 255)
-    display.set_pen(WHITE)
+    display.set_pen(BLACK)
     display.rectangle(1, 30, 100, 25)
 
     # writes the reading as text in the white rectangle
-    display.set_pen(BLACK)
+    display.set_pen(WHITE)
     display.set_font("sans")
     display.text(f"{t}", 10, 43, scale=1)
 
@@ -81,20 +82,25 @@ class TemperatureDisplay(object):
     # self.text(text, 0,57)
     if self.display is None:
       return
+    
+
     self.log.info(f'TODO : display bottom line text : {text}')
-    display = self.display
-    BLACK = display.create_pen(0, 0, 0)
-    WHITE = display.create_pen(255, 255, 255)
-    display.set_pen(WHITE)
-    display.rectangle(1, 60, 230, 25)
 
-    # writes the reading as text in the white rectangle
-    display.set_pen(BLACK)
-    display.set_font("sans")
-    display.text(f"{text}", 10, 70, scale=1)
+    self.tiny_status_text(text, top=230, left=250, width=100, height=10)
 
-    # time to update the display
-    display.update()
+    # display = self.display
+    # BLACK = display.create_pen(0, 0, 0)
+    # WHITE = display.create_pen(255, 255, 255)
+    # display.set_pen(BLACK)
+    # display.rectangle(1, 160, 230, 25)
+
+    # # writes the reading as text in the white rectangle
+    # display.set_pen(WHITE)
+    # display.set_font("bitmap8")
+    # display.text(f"{text}", 10, 170, scale=1)
+
+    # # time to update the display
+    # display.update()
     
   def showprogram(self, on_off, time):
     if self.display is None:
@@ -124,10 +130,51 @@ class TemperatureDisplay(object):
     # time to update the display
     display.update()
 
+  
 
-  def status(self, error):
-    formatted = f'{error}                                  '
+  def connection_status(self, status_text):
+    # formatted = f'{status_text}                                  '
     #self.text(formatted, 0, 0, 0)
+    # display = self.display
+    # BLACK = display.create_pen(0, 0, 0)
+    # WHITE = display.create_pen(255, 255, 255)
+    # display.set_pen(WHITE)
+    # top = 230
+    # left = 10
+    # height = 10
+    # width = 100
+
+    self.tiny_status_text(status_text, top=230, left=10, width=100, height=10)
+    # display.rectangle(left-10, top-1, width, height)
+
+    # # writes the reading as text in the white rectangle
+    # display.set_pen(BLACK)
+    # display.set_font("bitmap8")
+    # display.text(f"{status_text}", left, top, scale=1.0)
+
+    # # time to update the display
+    # display.update()
+
+  def tiny_status_text(self, status_text, top, left, height, width, invert=False):
+    formatted = f'{status_text}                                  '
+    #self.text(formatted, 0, 0, 0)
+    display = self.display
+    foreground = display.create_pen(0, 0, 0) #white
+    background = display.create_pen(255, 255, 255) #black
+    if invert:
+      background, foreground = foreground, background
+    display.set_pen(foreground)
+
+    display.rectangle(left-10, top-1, width, height)
+
+    # writes the reading as text in the white rectangle
+    display.set_pen(background)
+    display.set_font("bitmap8")
+    display.text(f"{status_text}", left, top, scale=1.0)
+
+    # time to update the display
+    display.update()
+
 
 
   def time(self, time):
@@ -175,13 +222,13 @@ if __name__ == "__main__":
   display = TemperatureDisplay()
   display.temperature(23.2)
   display.temperature_set('12.4')
-  display.status('Off')
+  display.connection_status('Connected')
   #display.cb(3)
   display.time('12:34')
   #display.text('On/10:23 ', 0,0, 0)
   #display.text('Off until 11:33', 0,0)
   display.text('t=24.5', 0,57)
-  display.bottom_line_text("!hello")
+  display.bottom_line_text("192.168.2.250")
   #display.text('22:33', 89,57)
 
   display.showprogram("On", "12:34")
