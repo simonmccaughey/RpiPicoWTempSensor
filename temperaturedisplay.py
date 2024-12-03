@@ -54,7 +54,7 @@ class TemperatureDisplay(object):
     self.text('t=%s     ' % t, 0,57)
 
   def bottom_line_text(self, text):
-    display.connection_status(text)
+    self.text(text, 0,57)
     
   def showprogram(self, on_off, time, day_of_week):
     #invert the colour if it is 'On'
@@ -67,8 +67,10 @@ class TemperatureDisplay(object):
       self.text(on_off + '/' + time + '                    ', 0,0, col)
       
 
-  def connection_status(self, error):
-    formatted = f'{error}                                  '
+  def connection_status(self, text):
+    if text == "Connected":
+      return
+    formatted = f'{text}                                  '
     self.text(formatted, 0, 0, 0)
 
 
