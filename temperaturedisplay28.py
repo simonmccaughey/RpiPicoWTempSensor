@@ -5,6 +5,9 @@ import time
 from pimoroni import RGBLED
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB332
 import logging
+import ntptime
+import time
+
 
 class TemperatureDisplay(object):
  
@@ -39,6 +42,28 @@ class TemperatureDisplay(object):
   def cb(self, n):
     self.log.info(f'TODO : display cb : {n}')
 
+  def get_ntp_time(self):
+    formatted_date = "Mon Jan 1";
+    try:
+      print("get NTP time")
+      ntptime.settime()
+      local_time = time.localtime()
+
+      print("get NTP time OK")
+
+      # Format the date
+      day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+      formatted_date = f"{day_names[local_time[6]]} {month_names[local_time[1] - 1]} {local_time[2]}"
+      print("Formatted Date:", formatted_date)
+    except:
+      print("Failed to sync time")
+      # Optionally provide fallback date/time
+
+    return formatted_date
+
+
   def refresh(self):
     if self.display is not None:
       display = self.display
@@ -47,6 +72,7 @@ class TemperatureDisplay(object):
       BACKGROUND = display.create_pen(140, 208, 235)
       DARK = display.create_pen(38, 130, 160)
 
+      
       # draw the background
       display.set_pen(display.create_pen(232, 241, 244))
       display.rectangle(1, 1, 320, 240)
@@ -139,11 +165,29 @@ class TemperatureDisplay(object):
       display.set_font("sans")
       display.set_pen(DARK)
       display.set_thickness(3)
-      display.text(f"{self.display_time}", 10, 30, scale=0.9)
+      display.text(f"{self.display_time}", 10, 22, scale=0.7)
       display.set_pen(WHITE)
       display.set_thickness(2)
-      display.text(f"{self.display_time}", 10, 30, scale=0.9)
+      display.text(f"{self.display_time}", 10, 22, scale=0.7)
       display.set_thickness(1)
+
+      #########################################################################
+      ##  Date / Day  Display
+
+      date_time = self.get_ntp_time()
+      width = display.measure_text(date_time, scale=0.7)
+      print(f"width:{width}")
+
+      display.set_font("sans")
+      display.set_pen(DARK)
+      display.set_thickness(3)
+      display.text(date_time, 310-width, 22, scale=0.7)
+      display.set_pen(WHITE)
+      display.set_thickness(2)
+      display.text(date_time, 310-width, 22, scale=0.7)
+      display.set_thickness(1)
+
+
 
       #########################################################################
       ##  Program  Display
