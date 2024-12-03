@@ -41,60 +41,109 @@ class TemperatureDisplay(object):
 
   def refresh(self):
     if self.display is not None:
-
-      #TODO draw the background
-
-
       display = self.display
       BLACK = display.create_pen(0, 0, 0)
       WHITE = display.create_pen(255, 255, 255)
+      BACKGROUND = display.create_pen(140, 208, 235)
+      DARK = display.create_pen(38, 130, 160)
+
+      # draw the background
+      display.set_pen(display.create_pen(232, 241, 244))
+      display.rectangle(1, 1, 320, 240)
+      display.set_pen(display.create_pen(245, 248, 249))
+      display.rectangle(5, 5, 320-10, 240-10)
+      display.set_pen(display.create_pen(175, 208, 220))
+      display.rectangle(6, 6, 320-12, 240-12)
+      display.set_pen(DARK)
+      display.rectangle(7, 7, 320-14, 240-14)
+      display.set_pen(display.create_pen(175, 208, 220))
+      display.rectangle(8, 8, 320-16, 240-16)
+      display.set_pen(BACKGROUND)
+      display.rectangle(9, 9, 320-18, 240-18)
+      
 
       #########################################################################
       ## Temperature Display
       self.log.info(f'TODO : display temperature : {self.display_temperature}')
-      display.set_pen(BLACK)
-      display.rectangle(1, 1, 100, 25)
+      # display.set_pen(BACKGROUND)
+      # display.rectangle(1, 1, 100, 25)
 
       # writes the reading as text in the white rectangle
-      display.set_pen(WHITE)
+      temperature_text = f"{self.display_temperature}"
+      width = display.measure_text(temperature_text, scale=2)
+      text_left = (320 // 2) - (width // 2) - 10
+      
       display.set_font("sans")
+      #draw the degrees symbol
+      display.set_pen(DARK)
+      display.set_thickness(4)
+      display.text("o", 225, 75, scale=1)
+      display.set_pen(WHITE)
+      display.set_thickness(3)
+      display.text("o", 225, 75, scale=1)
       display.set_thickness(1)
-      display.text(f"{self.display_temperature}", 10, 15, scale=1)
+
+
+      #draw the actual text
+      display.set_pen(DARK)
+      display.set_thickness(9)
+      display.text(temperature_text, text_left, 100, scale=2)
+      display.set_pen(BACKGROUND)
+      display.set_thickness(8)
+      display.text(temperature_text, text_left, 100, scale=2)
+      display.set_pen(WHITE)
+      display.set_thickness(5)
+      display.text(temperature_text, text_left, 100, scale=2)
+      display.set_thickness(1)
 
       #########################################################################
-      ## Temperature SET Display
+      ## Temperature Set/Target Display
 
       self.log.info(f'TODO : display SET temperature : {self.display_temperature_set}')
-      display.set_pen(BLACK)
-      display.rectangle(1, 30, 100, 25)
+      # display.set_pen(BACKGROUND)
+      # display.rectangle(1, 30, 100, 25)
 
       # writes the reading as text in the white rectangle
-      display.set_pen(WHITE)
+      target_text = f"t={self.display_temperature_set}"
+      width = display.measure_text(target_text, scale=0.8)
+      text_left = (320 // 2) - (width // 2)
+
       display.set_font("sans")
-      display.text(f"{self.display_temperature_set}", 10, 43, scale=1)
+      display.set_pen(DARK)
+      display.set_thickness(3)
+      display.text(target_text, text_left, 150, scale=0.8)
+      display.set_pen(WHITE)
+      display.set_thickness(2)
+      display.text(target_text, text_left, 150, scale=0.8)
+      display.set_thickness(1)
 
 
       #########################################################################
       ##  Bottom line text Display
       self.log.info(f'TODO : display bottom line text : {self.display_bottom_line_text}')
 
-      self.tiny_status_text(self.display_bottom_line_text, top=230, left=250, width=100, height=10)
+      self.tiny_status_text(self.display_bottom_line_text, top=222, left=240, width=80, height=10, foreground=BLACK, background=BACKGROUND)
 
       #########################################################################
       ##  Status text Display
-      self.tiny_status_text(self.display_status_text, top=230, left=10, width=100, height=10)
+      self.tiny_status_text(self.display_status_text, top=222, left=20, width=100, height=10, foreground=BLACK, background=BACKGROUND)
 
       #########################################################################
       ##  Time  Display
 
       self.log.info(f'TODO : display  time : {self.display_time}')
-      display.set_pen(WHITE)
-      display.rectangle(1, 120, 100, 25)
+      # display.set_pen(WHITE)
+      # display.rectangle(1, 120, 100, 25)
 
       # writes the reading as text in the white rectangle
-      display.set_pen(BLACK)
       display.set_font("sans")
-      display.text(f"{self.display_time}", 10, 130, scale=1)
+      display.set_pen(DARK)
+      display.set_thickness(3)
+      display.text(f"{self.display_time}", 10, 30, scale=0.9)
+      display.set_pen(WHITE)
+      display.set_thickness(2)
+      display.text(f"{self.display_time}", 10, 30, scale=0.9)
+      display.set_thickness(1)
 
       #########################################################################
       ##  Program  Display
@@ -108,13 +157,13 @@ class TemperatureDisplay(object):
         on_off_text = f'{self.display_on_off} until {self.display_day_of_week[0:3]} {self.display_on_off_time}'
       self.log.info(f'TODO : display prog : {on_off_text}')
 
-      display.set_pen(WHITE)
-      display.rectangle(1, 90, 230, 25)
+      # display.set_pen(WHITE)
+      # display.rectangle(10, 200, 230, 25)
 
       # writes the reading as text in the white rectangle
       display.set_pen(BLACK)
       display.set_font("sans")
-      display.text(on_off_text, 10, 100, scale=1)
+      display.text(on_off_text, 10, 200, scale=1)
 
 
 
@@ -160,20 +209,18 @@ class TemperatureDisplay(object):
     self.display_status_text = status_text
     self.refresh()
 
-  def tiny_status_text(self, status_text, top, left, height, width, invert=False):
+  def tiny_status_text(self, status_text, top, left, height, width, foreground, background, invert=False):
     formatted = f'{status_text}                                  '
     #self.text(formatted, 0, 0, 0)
     display = self.display
-    foreground = display.create_pen(0, 0, 0) #white
-    background = display.create_pen(255, 255, 255) #black
     if invert:
       background, foreground = foreground, background
-    display.set_pen(foreground)
+    display.set_pen(background)
 
     display.rectangle(left-10, top-1, width, height)
 
     # writes the reading as text in the white rectangle
-    display.set_pen(background)
+    display.set_pen(foreground)
     display.set_font("bitmap8")
     display.text(f"{status_text}", left, top, scale=1.0)
 
@@ -206,7 +253,7 @@ if __name__ == "__main__":
   import time
 
   display = TemperatureDisplay()
-  display.temperature(23.2)
+  display.temperature(13.2)
   display.temperature_set('12.4')
   display.connection_status('Startup')
   display.time('12:34')
@@ -225,6 +272,9 @@ if __name__ == "__main__":
   display.temperature(25.3)
   display.connection_status('Connected')
   display.time('12:37')
+  time.sleep(0.4)
+  display.showprogram("Off", "21:11", "Wednesday")
+
   #display.text('On/10:23 ', 0,0, 0)
   #display.text('Off until 11:33', 0,0)
   # display.text('t=24.5', 0,57)
