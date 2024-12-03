@@ -29,19 +29,21 @@ class Thermostat:
     print("Memory before Status:", gc.mem_free())
     gc.collect()
     print("Memory before Status:", gc.mem_free())
-
     self.status = Status()
-    self.log.info('Blinker')
-    print("Memory before LedBlinker:", gc.mem_free())
-    gc.collect()
-    print("Memory before LedBlinker:", gc.mem_free())
-    self.led = LedBlinker(pin=28)
-    self.led.blink_fast()
     self.log.info('Config')
     print("Memory before Config:", gc.mem_free())
     gc.collect()
     print("Memory before Config:", gc.mem_free())
     self.config =  Config()
+    self.log.info('Blinker')
+    print("Memory before LedBlinker:", gc.mem_free())
+    gc.collect()
+    print("Memory before LedBlinker:", gc.mem_free())
+    led_pin = "LED"
+    if str(self.config.screen28) == "True":
+      led_pin = 28
+    self.led = LedBlinker(pin=led_pin)
+    self.led.blink_fast()
 
     self.connected = False
     self.zone = self.config.zone
