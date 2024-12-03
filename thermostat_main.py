@@ -208,6 +208,7 @@ class Thermostat:
 def exception_handler(loop, context):
   log.error(f"Caught exception: {context['exception']}")
 
+t = None
 try:
 
   #restart webrepl, it works better after wifi is connected (apparently)
@@ -242,7 +243,8 @@ except:
   raise
 finally:
   try:
-    t.tidy_up()
+    if t:
+      t.tidy_up()
   finally:
     pass
   
