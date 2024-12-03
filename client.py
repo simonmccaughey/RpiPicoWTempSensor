@@ -68,7 +68,8 @@ class TcpClient:
 
   
   def close(self):
-    self.s.close()
+    if self.s is not None:
+      self.s.close()
     self.cb(90)
     
   def update_status(self):
