@@ -21,13 +21,15 @@ class TemperatureDisplay(object):
     self.display_temperature_set = "none"
     self.display_bottom_line_text = ""
     self.display_status_text = "Initialising"
-    self.display_time = "--:--"
+    self.display_time = None
     self.display_on_off = "???"
     self.display_on_off_time = "00:00"
     self.display_day_of_week = "Sunday"
     ##this is the format
-    # self.last_formatted_date = "Mon Nov 22"
-    self.last_formatted_date = "  "
+    # self.formatted_date = "Mon Nov 22"
+    self.formatted_date = None
+    self.sunrise = "0500"
+    self.sunset = "2300"
 
     self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, rotate=180)
     self.display.set_backlight(0.8)
@@ -40,7 +42,8 @@ class TemperatureDisplay(object):
   def cb(self, n):
     self.log.info(f'TODO : display cb : {n}')
 
-
+  def compare_times(self, time1, time2):
+    return int(time1.replace(":", "")) < int(time2.replace(":", ""))
 
   def refresh(self):
     gc.collect()
@@ -48,14 +51,22 @@ class TemperatureDisplay(object):
 
     if self.display is not None:
       display = self.display
+
+      daytime = True
+      ##check if we have time info, and if it is day or night
+      if self.display_time and (self.compare_times(self.display_time, self.sunrise) or self.compare_times(self.sunset, self.display_time)):
+        daytime = False
+
       BLACK = display.create_pen(0, 0, 0)
-      WHITE = display.create_pen(255, 255, 255)
-      BACKGROUND = display.create_pen(140, 208, 235)
+      WHITE = display.create_pen(255, 255, 255) if daytime else display.create_pen(180, 180, 180)
+      BACKGROUND = display.create_pen(140, 208, 235) if daytime else display.create_pen(20, 50, 70)
       DARK = display.create_pen(38, 130, 160)
+
+
 
       # if self.display_on_off == 'On':
       #   BACKGROUND = display.create_pen(235, 130, 120)
-      OUTSIDE_BORDER = display.create_pen(232, 241, 244)
+      OUTSIDE_BORDER = display.create_pen(232, 241, 244) if daytime else display.create_pen(150, 150, 150)
       BOTTOM_BAND = BLACK
       PROG_BACKGROUND = BACKGROUND
       if self.display_on_off == 'On':
@@ -68,13 +79,15 @@ class TemperatureDisplay(object):
       # draw the background
       display.set_pen(OUTSIDE_BORDER)
       display.rectangle(1, 1, 320, 240)
-      display.set_pen(display.create_pen(245, 248, 249))
+      line = display.create_pen(245, 248, 249)  if daytime else BLACK
+      display.set_pen(line)
       display.rectangle(5, 5, 320-10, 230-10)
-      display.set_pen(display.create_pen(175, 208, 220))
+      line = display.create_pen(245, 248, 249)  if daytime else display.create_pen(180, 180, 180)
+      display.set_pen(line)
       display.rectangle(6, 6, 320-12, 230-12)
       display.set_pen(DARK)
       display.rectangle(7, 7, 320-14, 230-14)
-      display.set_pen(display.create_pen(175, 208, 220))
+      display.set_pen(line)
       display.rectangle(8, 8, 320-16, 230-16)
       display.set_pen(BACKGROUND)
       display.rectangle(9, 9, 320-18, 230-18)
@@ -176,30 +189,33 @@ class TemperatureDisplay(object):
       # display.rectangle(1, 120, 100, 25)
 
       # writes the reading as text in the white rectangle
+      display_time = self.display_time if self.display_time else "--:--"
+
       display.set_font("sans")
       display.set_pen(DARK)
       display.set_thickness(3)
-      display.text(f"{self.display_time}", 10, 22, scale=0.7)
+      display.text(f"{display_time}", 10, 22, scale=0.7)
       display.set_pen(WHITE)
       display.set_thickness(2)
-      display.text(f"{self.display_time}", 10, 22, scale=0.7)
+      display.text(f"{display_time}", 10, 22, scale=0.7)
       display.set_thickness(1)
 
       #########################################################################
       ##  Date / Day  Display
 
-      date_time = self.last_formatted_date
-      width = display.measure_text(date_time, scale=0.7)
-      #print(f"width:{width}")
+      date_time = self.formatted_date
+      if date_time:
+        width = display.measure_text(date_time, scale=0.7)
+        #print(f"width:{width}")
 
-      display.set_font("sans")
-      display.set_pen(DARK)
-      display.set_thickness(3)
-      display.text(date_time, 310-width, 22, scale=0.7)
-      display.set_pen(WHITE)
-      display.set_thickness(2)
-      display.text(date_time, 310-width, 22, scale=0.7)
-      display.set_thickness(1)
+        display.set_font("sans")
+        display.set_pen(DARK)
+        display.set_thickness(3)
+        display.text(date_time, 310-width, 22, scale=0.7)
+        display.set_pen(WHITE)
+        display.set_thickness(2)
+        display.text(date_time, 310-width, 22, scale=0.7)
+        display.set_thickness(1)
 
       #########################################################################
       ##  Program  Display
@@ -262,7 +278,10 @@ class TemperatureDisplay(object):
     self.refresh()
 
 
-
+  def set_dates(self, day_of_week, month, mday, sunrise_time, sunset_time):
+    self.sunrise = sunrise_time
+    self.sunset = sunset_time
+    self.formatted_date = f'{day_of_week[0:3]} {month[0:3]} {mday}'
     
   def showprogram(self, on_off, time, day_of_week):
     self.display_on_off = on_off
@@ -340,34 +359,31 @@ if __name__ == "__main__":
   display.connection_status('Startup')
   display.time('12:34')
   display.bottom_line_text("192.168.2.250")
-  display.showprogram("On", "12:34", "Tuesday")
-  #display.cb(3)
-  time.sleep(0.4)
-  display.temperature(23.3)
-  display.connection_status('Wifi...')
-  display.time('12:35')
-  time.sleep(0.4)
-  display.temperature(24.3)
-  display.connection_status('Client...')
-  display.time('12:36')
-  time.sleep(0.4)
-  display.temperature(25.3)
-  display.connection_status('Connected')
-  display.time('12:37')
-  time.sleep(0.4)
+  # display.showprogram("On", "12:34", "Tuesday")
+  # time.sleep(0.4)
+  # display.temperature(23.3)
+  # display.connection_status('Wifi...')
+  # display.time('12:35')
+  # time.sleep(0.4)
+  # display.temperature(24.3)
+  # display.connection_status('Client...')
+  # display.time('12:36')
+  # time.sleep(0.4)
+  # display.temperature(25.3)
+  # display.connection_status('Connected')
+  # display.time('12:37')
+  # time.sleep(0.4)
   display.showprogram("Off", "21:11", "Wednesday")
-
-  #display.text('On/10:23 ', 0,0, 0)
-  #display.text('Off until 11:33', 0,0)
-  # display.text('t=24.5', 0,57)
-  #display.text('22:33', 89,57)
-
-  #display.text('Off/11:44', 0,0, 1)
-  #display.text('           ', 0,0, 1)
-  #display.text('On/10:23                                  ', 0,0, 0)
-
-  #display.status('On', '12:22')
-
+  display.set_dates("Tuesday", "November", "24", "0900", "1600")
+  # display.time('00:36')
+  # time.sleep(0.4)
+  # display.time('12:36')
+  # time.sleep(0.4)
+  display.time('22:36')
+  time.sleep(0.4)
+  display.showprogram("On", "12:34", "Tuesday")
+  
+  
 
 
 

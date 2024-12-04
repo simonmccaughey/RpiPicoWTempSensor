@@ -170,6 +170,10 @@ class Thermostat:
         self.status.time = time
         self.status.state = parts[2]
         self.display.connection_status("Connected")
+    if(parts[0] == 'DateTimeInfo'):
+      #    0          1      2        3   4      5              6
+      #DateTimeInfo 2024 November|11 24 Monday sunrise|07:00 sunset|22:00
+      self.display.set_dates(parts[3], parts[2].split("|")[0], parts[3], parts[4], parts[5].split("|")[0], parts[6].split("|")[0])
 
   def status_update(self, wifi_connected, client_connected, ip):
     #NOTE: sometimes wifi status is reported as False even when 
@@ -180,6 +184,10 @@ class Thermostat:
     
     status = 'Connected'
     self.status.wifi = wifi_connected
+    if self.status.client == False and client_connected == True:
+      #status has changed - make a request for date info
+      self.client.send("DateTimeInfo\n")
+    
     self.status.client = client_connected
 
     #print the IP to the screen, but only the first time we receive it
