@@ -55,7 +55,10 @@ class TemperatureDisplay(object):
 
   def bottom_line_text(self, text):
     self.text(text, 0,57)
-    
+
+  def set_dates(self, day_of_week, month, mday, sunrise_time, sunset_time):
+    pass
+
   def showprogram(self, on_off, time, day_of_week):
     #invert the colour if it is 'On'
     col = 0 if on_off == 'On' else 1

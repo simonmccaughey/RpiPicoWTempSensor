@@ -30,6 +30,8 @@ class TemperatureDisplay(object):
     self.formatted_date = None
     self.sunrise = "0500"
     self.sunset = "2300"
+    ## this is the one that comes from the server
+    self.day = ""
 
     self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, rotate=180)
     self.display.set_backlight(0.8)
@@ -228,7 +230,7 @@ class TemperatureDisplay(object):
       elif self.display_on_off == "On":
         on_off_text = f'{self.display_on_off} until {self.display_on_off_time}'
       elif self.display_on_off == "Off":
-        on_off_text = f'{self.display_on_off} until {self.display_day_of_week[0:3]} {self.display_on_off_time}'
+        on_off_text = f'{self.display_on_off} until {self.display_day_of_week[0:3]} {self.display_on_off_time}'.replace(f'{self.day} ', '')
       self.log.info(f'TODO : display prog : {on_off_text}')
 
       width = display.measure_text(on_off_text, scale=0.8)
@@ -279,9 +281,11 @@ class TemperatureDisplay(object):
 
 
   def set_dates(self, day_of_week, month, mday, sunrise_time, sunset_time):
+    print(f'times received: day:{day_of_week} month:{month} mday:{mday} rise:{sunrise_time} set:{sunset_time}')
     self.sunrise = sunrise_time
     self.sunset = sunset_time
     self.formatted_date = f'{day_of_week[0:3]} {month[0:3]} {mday}'
+    self.day = day_of_week[0:3]
     
   def showprogram(self, on_off, time, day_of_week):
     self.display_on_off = on_off
@@ -359,31 +363,38 @@ if __name__ == "__main__":
   display.connection_status('Startup')
   display.time('12:34')
   display.bottom_line_text("192.168.2.250")
-  # display.showprogram("On", "12:34", "Tuesday")
-  # time.sleep(0.4)
-  # display.temperature(23.3)
-  # display.connection_status('Wifi...')
-  # display.time('12:35')
-  # time.sleep(0.4)
-  # display.temperature(24.3)
-  # display.connection_status('Client...')
-  # display.time('12:36')
-  # time.sleep(0.4)
-  # display.temperature(25.3)
-  # display.connection_status('Connected')
-  # display.time('12:37')
-  # time.sleep(0.4)
+  display.showprogram("On", "12:34", "Tuesday")
+  time.sleep(0.4)
+  display.temperature(23.3)
+  display.connection_status('Wifi...')
+  display.time('12:35')
+  time.sleep(0.4)
+  display.temperature(24.3)
+  display.connection_status('Client...')
+  display.time('12:36')
+  time.sleep(0.4)
+  display.temperature(25.3)
+  display.connection_status('Connected')
+  display.time('12:37')
+  time.sleep(0.4)
   display.showprogram("Off", "21:11", "Wednesday")
   display.set_dates("Tuesday", "November", "24", "0900", "1600")
-  # display.time('00:36')
-  # time.sleep(0.4)
-  # display.time('12:36')
-  # time.sleep(0.4)
+  display.time('00:36')
+  time.sleep(0.4)
+  display.time('12:36')
+  time.sleep(0.4)
   display.time('22:36')
   time.sleep(0.4)
   display.showprogram("On", "12:34", "Tuesday")
   
+  ##This is the same code that should be in the main class
+  #            0        1     2         3   4          5              6
+  line = "DateTimeInfo 2024 December|12 04 Wednesday sunrise|08:34 sunset|16:01"
+  parts = line.split(' ')
+  #day_of_week, month, mday, sunrise_time, sunset_time
+  display.set_dates(parts[4], parts[2].split("|")[0], parts[3], parts[5].split("|")[1], parts[6].split("|")[1])
   
+  display.showprogram("On", "12:34", "Tuesday")
 
 
 

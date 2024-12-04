@@ -14,6 +14,7 @@ from config import Config
 from led_control import LedBlinker
 from status import Status
 import sys
+import utime
 
 
 import logging
@@ -62,7 +63,8 @@ class Thermostat:
     print("Memory before TemperatureDisplay:", gc.mem_free())
     self.display = TemperatureDisplay(self.zone)
     #display the version briefly at startup
-    self.display.bottom_line_text('241202 2342 2.8 LCD')
+    self.display.bottom_line_text('241204 2200 2.8 LCD')
+    self.last_date_info_time = 0
   
     #check if we are in non-start mode
     if(self.config.mode == '0'):
@@ -81,7 +83,8 @@ class Thermostat:
     self.sensor.auto_report = self.config.auto_report
     
     self.client = None
-    
+    print(f'time {utime.time()} - last: {self.last_date_info_time}')
+
     #D0	16
     #D1	5
     #D2	4
@@ -170,10 +173,22 @@ class Thermostat:
         self.status.time = time
         self.status.state = parts[2]
         self.display.connection_status("Connected")
+
+        # ##check if we need to request DateTimeInfo (after midnight, and not within an hour of prev request)
+        if (utime.time() - self.last_date_info_time > 3600) and time.startswith('00'):
+          ##TODO add this (probably below where it is received)
+          #self.last_fetch_time = utime.time()
+          print("requesting DateTimeInfo")
+          self.client.send("DateTimeInfo\n")
+        else:
+          print("NOT requesting DateTimeInfo")
+
+
     if(parts[0] == 'DateTimeInfo'):
       #    0          1      2        3   4      5              6
       #DateTimeInfo 2024 November|11 24 Monday sunrise|07:00 sunset|22:00
-      self.display.set_dates(parts[3], parts[2].split("|")[0], parts[3], parts[4], parts[5].split("|")[0], parts[6].split("|")[0])
+      self.display.set_dates(parts[4], parts[2].split("|")[0], parts[3], parts[5].split("|")[1], parts[6].split("|")[1])
+      self.last_fetch_time = utime.time()
 
   def status_update(self, wifi_connected, client_connected, ip):
     #NOTE: sometimes wifi status is reported as False even when 
@@ -187,7 +202,7 @@ class Thermostat:
     if self.status.client == False and client_connected == True:
       #status has changed - make a request for date info
       self.client.send("DateTimeInfo\n")
-    
+
     self.status.client = client_connected
 
     #print the IP to the screen, but only the first time we receive it
