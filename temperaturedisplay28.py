@@ -257,6 +257,9 @@ class TemperatureDisplay(object):
 
     
     pass
+  def brightness(self, value):
+      print(f"Display brightness set to {value}")
+      self.display.set_backlight(value)
 
   def temperature(self, temperature):
     self.display_temperature = temperature

@@ -15,6 +15,7 @@ from led_control import LedBlinker
 from status import Status
 import sys
 import utime
+from machine import Pin
 
 
 import logging
@@ -105,9 +106,26 @@ class Thermostat:
     self.display.connection_status('Starting...')
     self.log.info('TCP Client')
     self.client = TcpClient(self.text_received, self.status_update, self.cb)
+
+    self.brightness = 0.5  
+    increase_pin = Pin(13, Pin.IN, Pin.PULL_UP)  # Replace 12 with your GPIO pin number
+    decrease_pin = Pin(12, Pin.IN, Pin.PULL_UP)  # Replace 13 with your GPIO pin number
+    increase_pin.irq(trigger=Pin.IRQ_FALLING, 
+                          handler=lambda pin: self.adjust_brightness(0.1))
+    decrease_pin.irq(trigger=Pin.IRQ_FALLING, 
+                          handler=lambda pin: self.adjust_brightness(-0.1))
+
+
     self.loop = asyncio.get_event_loop()
     self.loop.create_task(self.uptime())
     self.loop.create_task(self.print_status())
+  def adjust_brightness(self, delta):
+      # Adjust brightness within the range [0.0, 1.0]
+      new_brightness = max(0.0, min(1.0, self.brightness + delta))
+      if new_brightness != self.brightness:  # Only update if there is a change
+          self.brightness = new_brightness
+          self.display.brightness(self.brightness)  # Call display method
+          print(f"Brightness set to {self.brightness}")
   
   def press(self, p):
     print('Button pressed!! ', p)
