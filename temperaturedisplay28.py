@@ -45,7 +45,7 @@ class TemperatureDisplay(object):
     self.log.info(f'TODO : display cb : {n}')
 
   def compare_times(self, time1, time2):
-    return int(time1.replace(":", "")) < int(time2.replace(":", ""))
+    return int(time1.replace(":", "")) <= int(time2.replace(":", ""))
 
   def refresh(self):
     gc.collect()
