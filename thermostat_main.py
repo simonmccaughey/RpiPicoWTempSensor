@@ -172,7 +172,17 @@ class Thermostat:
       time = parts[2][0:5]
       self.display.time(time)
       self.status.last_time = parts[2]
-      return
+
+      # ##check if we need to request DateTimeInfo (after midnight, and not within an hour of prev request)
+      if (utime.time() - self.last_date_info_time > 3600) and time.startswith('00'):
+        ##TODO add this (probably below where it is received)
+        #self.last_fetch_time = utime.time()
+        print("requesting DateTimeInfo")
+        self.client.send("DateTimeInfo\n")
+      else:
+        print("NOT requesting DateTimeInfo")
+
+      return # so we dont blink the LED
   
     #blink the LED to show we got data
     self.led.blink()
@@ -191,16 +201,6 @@ class Thermostat:
         self.status.time = time
         self.status.state = parts[2]
         self.display.connection_status("Connected")
-
-        # ##check if we need to request DateTimeInfo (after midnight, and not within an hour of prev request)
-        if (utime.time() - self.last_date_info_time > 3600) and time.startswith('00'):
-          ##TODO add this (probably below where it is received)
-          #self.last_fetch_time = utime.time()
-          print("requesting DateTimeInfo")
-          self.client.send("DateTimeInfo\n")
-        else:
-          print("NOT requesting DateTimeInfo")
-
 
     if(parts[0] == 'DateTimeInfo'):
       #    0          1      2        3   4      5              6
