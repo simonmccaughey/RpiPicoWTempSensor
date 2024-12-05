@@ -43,7 +43,7 @@ class Thermostat:
     print("Memory before LedBlinker:", gc.mem_free())
     led_pin = "LED"
     if str(self.config.screen28) == "True":
-      led_pin = 28
+      led_pin = 27
     self.led = LedBlinker(pin=led_pin)
     self.led.blink_fast()
 
@@ -108,8 +108,14 @@ class Thermostat:
     self.client = TcpClient(self.text_received, self.status_update, self.cb)
 
     self.brightness = 0.5  
-    increase_pin = Pin(13, Pin.IN, Pin.PULL_UP)  # Replace 12 with your GPIO pin number
-    decrease_pin = Pin(12, Pin.IN, Pin.PULL_UP)  # Replace 13 with your GPIO pin number
+    boost_pin = Pin(15, Pin.IN, Pin.PULL_UP)  
+    off_pin = Pin(14, Pin.IN, Pin.PULL_UP)  
+    increase_pin = Pin(13, Pin.IN, Pin.PULL_UP)  
+    decrease_pin = Pin(12, Pin.IN, Pin.PULL_UP)  
+    boost_pin.irq(trigger=Pin.IRQ_FALLING, 
+                          handler=lambda pin: self.client.send(f"Boost {self.zone}\n"))
+    off_pin.irq(trigger=Pin.IRQ_FALLING, 
+                          handler=lambda pin: self.client.send(f"SetZoneOff {self.zone}\n"))
     increase_pin.irq(trigger=Pin.IRQ_FALLING, 
                           handler=lambda pin: self.adjust_brightness(0.1))
     decrease_pin.irq(trigger=Pin.IRQ_FALLING, 
