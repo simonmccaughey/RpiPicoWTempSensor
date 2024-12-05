@@ -75,7 +75,7 @@ class TemperatureDisplay(object):
         #make the wee band be red
         RED = display.create_pen(235, 0, 0)
         OUTSIDE_BORDER = RED
-        BOTTOM_BAND = RED
+        #BOTTOM_BAND = RED
         PROG_BACKGROUND = RED
 
       # draw the background
@@ -196,10 +196,10 @@ class TemperatureDisplay(object):
       display.set_font("sans")
       display.set_pen(DARK)
       display.set_thickness(3)
-      display.text(f"{display_time}", 10, 22, scale=0.7)
+      display.text(f"{display_time}", 12, 22, scale=0.7)
       display.set_pen(WHITE)
       display.set_thickness(2)
-      display.text(f"{display_time}", 10, 22, scale=0.7)
+      display.text(f"{display_time}", 12, 22, scale=0.7)
       display.set_thickness(1)
 
       #########################################################################
@@ -207,22 +207,22 @@ class TemperatureDisplay(object):
 
       date_time = self.formatted_date
       if date_time:
+        date_time = date_time.replace(' 0', ' ') # replace Dec 05 with Dec 5
         width = display.measure_text(date_time, scale=0.7)
         #print(f"width:{width}")
 
         display.set_font("sans")
         display.set_pen(DARK)
         display.set_thickness(3)
-        display.text(date_time, 310-width, 22, scale=0.7)
+        display.text(date_time, 308-width, 22, scale=0.7)
         display.set_pen(WHITE)
         display.set_thickness(2)
-        display.text(date_time, 310-width, 22, scale=0.7)
+        display.text(date_time, 308-width, 22, scale=0.7)
         display.set_thickness(1)
 
       #########################################################################
       ##  Program  Display
 
-      #TODO invert the colour or something if it is 'On'
       on_off_text = ""
       if self.display_on_off_time == '00:00':
         #dont show the time if it is 00:00
