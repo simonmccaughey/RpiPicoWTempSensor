@@ -38,6 +38,9 @@ class TemperatureDisplay(object):
   def cb(self, n):
     self.text(str(n),113,17)
 
+  def brightness(self, value):
+    pass
+  
   def temperature(self, temperature):
     if self.display is not None:
       Writer.set_textpos(16, 20)
