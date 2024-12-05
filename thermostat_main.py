@@ -173,10 +173,10 @@ class Thermostat:
       self.display.time(time)
       self.status.last_time = parts[2]
 
-      # ##check if we need to request DateTimeInfo (after midnight, and not within an hour of prev request)
+
+      # ##check if we need to request DateTimeInfo (used to display day/month at top right)
+      # Request after midnight, and not within an hour of previous request
       if (utime.time() - self.last_date_info_time > 3600) and time.startswith('00'):
-        ##TODO add this (probably below where it is received)
-        #self.last_fetch_time = utime.time()
         print("requesting DateTimeInfo")
         self.client.send("DateTimeInfo\n")
       else:
@@ -206,7 +206,7 @@ class Thermostat:
       #    0          1      2        3   4      5              6
       #DateTimeInfo 2024 November|11 24 Monday sunrise|07:00 sunset|22:00
       self.display.set_dates(parts[4], parts[2].split("|")[0], parts[3], parts[5].split("|")[1], parts[6].split("|")[1])
-      self.last_fetch_time = utime.time()
+      self.last_date_info_time = utime.time()
 
   def status_update(self, wifi_connected, client_connected, ip):
     #NOTE: sometimes wifi status is reported as False even when 
