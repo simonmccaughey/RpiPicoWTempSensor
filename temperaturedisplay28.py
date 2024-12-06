@@ -17,7 +17,7 @@ class TemperatureDisplay(object):
     self.log = logging.getLogger('Display28')
     self.log.info('Opening Display 2.8 pimorini=')
     self.display_zone = zone
-    self.display_temperature = "00.0"
+    self.display_temperature = "--.-"
     self.display_temperature_set = "none"
     self.display_bottom_line_text = ""
     self.display_status_text = "Initialising"
