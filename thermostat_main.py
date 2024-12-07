@@ -63,6 +63,9 @@ class Thermostat:
     gc.collect()
     print("Memory before TemperatureDisplay:", gc.mem_free())
     self.display = TemperatureDisplay(self.zone)
+    self.brightness = float(self.config.brightness_0_1)
+    self.display.brightness(self.brightness)
+
     #display the version briefly at startup
     self.display.bottom_line_text('241204 2200 2.8 LCD')
     self.last_date_info_time = 0
@@ -107,7 +110,6 @@ class Thermostat:
     self.log.info('TCP Client')
     self.client = TcpClient(self.text_received, self.status_update, self.cb)
 
-    self.brightness = 0.5  
     boost_pin = Pin(15, Pin.IN, Pin.PULL_UP)  
     off_pin = Pin(14, Pin.IN, Pin.PULL_UP)  
     increase_pin = Pin(13, Pin.IN, Pin.PULL_UP)  
@@ -127,10 +129,12 @@ class Thermostat:
     self.loop.create_task(self.print_status())
   def adjust_brightness(self, delta):
       # Adjust brightness within the range [0.0, 1.0]
-      new_brightness = max(0.0, min(1.0, self.brightness + delta))
+      new_brightness = round(max(0.0, min(1.0, self.brightness + delta)), 1)
       if new_brightness != self.brightness:  # Only update if there is a change
           self.brightness = new_brightness
           self.display.brightness(self.brightness)  # Call display method
+          self.config.brightness_0_1 = self.brightness
+          self.config.save()
           print(f"Brightness set to {self.brightness}")
   
   def press(self, p):

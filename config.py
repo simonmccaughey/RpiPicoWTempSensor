@@ -14,6 +14,8 @@ class Config:
   mode = None
   auto_report = True
   screen28 = False
+  #brightness 0 to 1
+  brightness_0_1 = "0.5"
       
 
 	
@@ -70,7 +72,7 @@ class Config:
 
 
   def fields(self):
-    return ['wifi_ssid', 'wifi_password', 'host', 'port', 'client_name', 'zone', 'mode', 'auto_report', 'screen28']
+    return ['wifi_ssid', 'wifi_password', 'host', 'port', 'client_name', 'zone', 'mode', 'auto_report', 'screen28', 'brightness_0_1']
 
 
 if __name__ == "__main__":
