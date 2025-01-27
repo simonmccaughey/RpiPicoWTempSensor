@@ -7,6 +7,7 @@ from watchdog import WDT
 import uasyncio as asyncio
 from config import Config
 import logging
+import sys
 
 
 class TcpClient:
@@ -222,7 +223,13 @@ def status_main(wifi_connected, client_connected, ip):
  
 def exception_handler(loop, context):
   log = logging.getLogger('main')
-  log.error(f"Caught exception: {context['exception']}")
+  exc = context.get('exception')
+  if exc:
+      log.error(f"Caught exception: {exc}")
+      # Print the stack trace to the console or log it
+      sys.print_exception(exc)
+  else:
+      log.error(f"Exception occurred without an explicit exception object: {context}")
 
  
 if __name__ == "__main__":

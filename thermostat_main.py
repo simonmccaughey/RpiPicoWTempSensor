@@ -278,7 +278,14 @@ class Thermostat:
 
 
 def exception_handler(loop, context):
-  log.error(f"Caught exception: {context['exception']}")
+  log = logging.getLogger('main')
+  exc = context.get('exception')
+  if exc:
+      log.error(f"Caught exception: {exc}")
+      # Print the stack trace to the console or log it
+      sys.print_exception(exc)
+  else:
+      log.error(f"Exception occurred without an explicit exception object: {context}")
 
 t = None
 try:
