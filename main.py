@@ -1,1 +1,1 @@
-exec(open('./thermostat_main.py').read(),globals())
+import thermostat_main

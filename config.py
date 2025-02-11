@@ -10,9 +10,10 @@ class Config:
   host = None
   port = None
   client_name = None
-  zone = None
+  zone = 'Upstairs'
   mode = None
   auto_report = True
+  screen28 = False
       
 
 	
@@ -69,7 +70,7 @@ class Config:
 
 
   def fields(self):
-    return ['wifi_ssid', 'wifi_password', 'host', 'port', 'client_name', 'zone', 'mode', 'auto_report']
+    return ['wifi_ssid', 'wifi_password', 'host', 'port', 'client_name', 'zone', 'mode', 'auto_report', 'screen28']
 
 
 if __name__ == "__main__":

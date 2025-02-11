@@ -8,7 +8,7 @@ import logging
 class TemperatureDisplay(object):
  
   #pin 5 is D1 and pin 4 is D2
-  def __init__(self, sda_pin_num=8, scl_pin_num=9):
+  def __init__(self, zone, sda_pin_num=8, scl_pin_num=9):
     self.log = logging.getLogger('Display')
     self.log.info('Opening I2C using sda=' + str(sda_pin_num) + ', scl=' + str(scl_pin_num))
     self.i2c = I2C(0, sda=Pin(sda_pin_num, machine.Pin.OUT), scl=Pin(scl_pin_num, machine.Pin.OUT))
@@ -38,6 +38,9 @@ class TemperatureDisplay(object):
   def cb(self, n):
     self.text(str(n),113,17)
 
+  def brightness(self, value):
+    pass
+  
   def temperature(self, temperature):
     if self.display is not None:
       Writer.set_textpos(16, 20)
@@ -55,8 +58,11 @@ class TemperatureDisplay(object):
 
   def bottom_line_text(self, text):
     self.text(text, 0,57)
-    
-  def showprogram(self, on_off, time):
+
+  def set_dates(self, day_of_week, month, mday, sunrise_time, sunset_time):
+    pass
+
+  def showprogram(self, on_off, time, day_of_week):
     #invert the colour if it is 'On'
     col = 0 if on_off == 'On' else 1
     #put a load of spaces along the display to colour it in
@@ -67,8 +73,10 @@ class TemperatureDisplay(object):
       self.text(on_off + '/' + time + '                    ', 0,0, col)
       
 
-  def status(self, error):
-    formatted = f'{error}                                  '
+  def connection_status(self, text):
+    if text == "Connected":
+      return
+    formatted = f'{text}                                  '
     self.text(formatted, 0, 0, 0)
 
 
@@ -95,22 +103,35 @@ class TemperatureDisplay(object):
     
 if __name__ == "__main__":
 
-  display = TemperatureDisplay()
-  display.temperature(23.2)
-  #display.temperature_set('12.4')
-  display.status('Off')
+  import time
+
+  display = TemperatureDisplay("Upstairs")
+  display.temperature(13.2)
+  display.temperature_set('12.4')
+  display.connection_status('Startup')
+  #display.time('12:34')
+  display.bottom_line_text("192.168.2.250")
+  time.sleep(0.4)
+
+  display.showprogram("On", "12:34", "Tuesday")
   #display.cb(3)
-  display.time('12:34')
-  display.text('On/10:23 ', 0,0, 0)
-  #display.text('Off until 11:33', 0,0)
-  display.text('t=24.5', 0,57)
-  #display.text('22:33', 89,57)
+  time.sleep(0.4)
+  display.temperature(23.3)
+  display.connection_status('Wifi...')
+  display.time('12:35')
+  time.sleep(0.4)
+  display.temperature(24.3)
+  display.connection_status('Client...')
+  display.time('12:36')
+  time.sleep(0.4)
+  display.temperature(25.3)
+  display.connection_status('Connected')
+  display.time('12:37')
+  time.sleep(0.4)
+  display.showprogram("Off", "21:11", "Wednesday")
 
-  #display.text('Off/11:44', 0,0, 1)
-  #display.text('           ', 0,0, 1)
-  #display.text('On/10:23                                  ', 0,0, 0)
-
-  #display.status('On', '12:22')
+  time.sleep(0.4)
+  display.temperature_set('12.4')
 
 
 

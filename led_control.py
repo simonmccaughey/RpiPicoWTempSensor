@@ -8,10 +8,11 @@ import logging
 
 class LedBlinker:
   
-  def __init__(self):
+  #You can specify a gpio number for pin - pin=28 for example
+  def __init__(self, pin="LED"):
     self.log = logging.getLogger('LedBlinker')
     self.timer = Timer()  
-    self.led=Pin("LED", Pin.OUT)
+    self.led=Pin(pin, Pin.OUT)
     self.blink_period = -1
     self.state = 0
     #start the timer
