@@ -64,7 +64,7 @@ class TcpClient:
 
     self.update_status()
     
-    self.log.info('Init Complete.')
+    print('Init Complete.')
     self.cb(20)
 
   
@@ -87,13 +87,13 @@ class TcpClient:
       #print(f'callback completed.............{self.status_callback}')
   
   async def wifi(self):
-    self.log.info('=================>>>>  initialising wifi')
+    print('=================>>>>  initialising wifi')
     if not self.sta_if.isconnected():
       self.sta_if.active(False)
       await asyncio.sleep_ms(1000)
     self.sta_if.active(True)
     self.sta_if.connect(self.wireless_ssid, self.wireless_password)
-    self.log.info('initialising wifi completed')
+    print('initialising wifi completed')
 
   async def send_ack_loop(self):
     #print("in ack block " + str(self.connected))
@@ -122,13 +122,11 @@ class TcpClient:
     try:
   
       #TODO - send proper status for wifi / client disconnection
-      self.log.info('Starting...' + str(self.host)  + ':' + str(self.port))
+      print('Starting...' + str(self.host)  + ':' + str(self.port))
       self.update_status()
       self.cb(30)
       await self.wifi()
      
-      addr_info = socket.getaddrinfo(self.host, self.port)
-      addr = addr_info[0][-1]
       wifi_iterations = 0
 
       while True:
@@ -138,7 +136,7 @@ class TcpClient:
           self.cb(50)
           self.update_status()
           if(self.sta_if.isconnected() == False):
-            self.log.info('Not connected...')
+            print('Not connected...')
             wifi_iterations += 1
             if(wifi_iterations > 10):
               wifi_iterations = 0
@@ -146,15 +144,21 @@ class TcpClient:
               
           self.update_status()
 
-          self.log.info('Trying to connect to ' + str(addr))
+          # Address lookup after wifi connection, and inside try/except block
+          print('get address')
+          addr_info = socket.getaddrinfo(self.host, self.port)
+          addr = addr_info[0][-1]
+          print(f'got address {addr}')
+          
+          print('Trying to connect to ' + str(addr))
           #display.status(str(addr))
           self.s = socket.socket()
           self.s.connect(addr)
       
           #TODO - client name here should be a single string
           self.s.write("ClientName %s-%s\n" % (self.client_name, self.zone))
-          self.log.info('Connected!')
-          self.log.info('' + str(self.sta_if.ifconfig()))
+          print('Connected!')
+          print('' + str(self.sta_if.ifconfig()))
           #send an ack to get the time straight away
           self.send("ACK time\n")
           self.cb(51)
@@ -165,7 +169,7 @@ class TcpClient:
             self.update_status()
             self.cb(61)
             line = await sreader.readline()
-            self.log.info('Recieved' + str(line))
+            print('Recieved' + str(line))
             self.cb(70)
 
             line = line.decode('utf-8').rstrip()
@@ -190,7 +194,7 @@ class TcpClient:
           self.cb(83)
 
           #this happens if the WIFI disconnects, or if the socket disconnects
-          self.log.info('environment exception : ' + str(e) + ' Wifi:' + str(self.sta_if.isconnected()))
+          print('environment exception : ' + str(e) + ' Wifi:' + str(self.sta_if.isconnected()))
           
           self.update_status()
           self.cb(84)
@@ -198,7 +202,7 @@ class TcpClient:
           await asyncio.sleep_ms(5000)
           self.cb(85)
     except BaseException as e:
-      self.log.info(f'Exception : {e} ' + str(e))
+      print(f'Exception : {e} ' + str(e))
       raise e
           
     finally:
@@ -208,7 +212,7 @@ class TcpClient:
       if self.s is not None:
         self.s.close()
         self.cb(87)
-      self.log.info('All done!')
+      print('All done!')
 
           
 def rx(line):
