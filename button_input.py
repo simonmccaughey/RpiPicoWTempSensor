@@ -1,55 +1,33 @@
+import uasyncio as asyncio
 from machine import Pin
 import time
 
 class ButtonInput:
-    def __init__(self, callback=None, debounce_time_ms=50):
+    def __init__(self, pin_number, callback=None, debounce_time_ms=150, button_name="button"):
+        self.pin = Pin(pin_number, Pin.IN, Pin.PULL_UP)
         self.callback = callback
         self.debounce_time_ms = debounce_time_ms
-        
-        # Dictionary to store the last press time for each button
-        self.last_press_time = {
-            "a": 0,
-            "b": 0,
-            "x": 0,
-            "y": 0
-        }
+        self.button_name = button_name
+        self.last_press_time = 0
+        self.pending_press = False
 
-        # Initialize pins for buttons
-        self.buttons = {
-            "a": Pin(12, Pin.IN, Pin.PULL_UP),
-            "b": Pin(13, Pin.IN, Pin.PULL_UP),
-            "x": Pin(14, Pin.IN, Pin.PULL_UP),
-            "y": Pin(15, Pin.IN, Pin.PULL_UP)
-        }
+        # Attach interrupt
+        self.pin.irq(trigger=Pin.IRQ_FALLING, handler=self._irq_handler)
 
-        # Set up interrupts for button presses
-        for button_id, pin in self.buttons.items():
-            pin.irq(trigger=Pin.IRQ_FALLING, handler=lambda pin, btn=button_id: self._handle_button(btn))
-
-    def _handle_button(self, button_id):
-        """
-        Internal method to handle button press events with debounce.
-        Calls the provided callback with the button ID if it exists.
-        """
+    def _irq_handler(self, pin):
+        """Minimal work in IRQ: just note that a press happened."""
         current_time = time.ticks_ms()
-        last_time = self.last_press_time[button_id]
+        if time.ticks_diff(current_time, self.last_press_time) > self.debounce_time_ms:
+            self.last_press_time = current_time
+            self.pending_press = True  # Flag for main loop
 
-        # Check if the time since the last press is greater than the debounce time
-        if time.ticks_diff(current_time, last_time) > self.debounce_time_ms:
-            self.last_press_time[button_id] = current_time
-            self._check_multiple_buttons()
+    def poll(self):
+        """Call this periodically from main loop."""
+        if self.pending_press:
+            self.pending_press = False
+            if self.callback:
+                self.callback(self.button_name)
 
-    def _check_multiple_buttons(self):
-        """
-        Check the state of all buttons and detect multiple button presses.
-        Calls the callback with a string of currently pressed buttons.
-        """
-        # Get a sorted list of pressed buttons
-        pressed_buttons = sorted([btn for btn, pin in self.buttons.items() if not pin.value()])
-        
-        # Join the button IDs into a single string
-        if pressed_buttons and self.callback:
-            self.callback("".join(pressed_buttons))
 
 # Example usage
 def button_callback(pressed_buttons):
@@ -70,9 +48,10 @@ if __name__ == "__main__":
 
   # Create the ButtonInput instance with the callback function
   print("getting ready to test button input")
-  button_input = ButtonInput(callback=button_callback)
+  b1 = ButtonInput(callback=button_callback, button_name="test_button", pin_number=15)
 
   # Keep the script running to allow event handling
   import time
   while True:
-      time.sleep(0.1)
+      time.sleep(0.05)
+      b1.poll()
