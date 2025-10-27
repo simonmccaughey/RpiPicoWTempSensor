@@ -2,56 +2,39 @@ import uasyncio as asyncio
 from machine import Pin
 import time
 
-class ButtonInput:
-    def __init__(self, pin_number, callback=None, debounce_time_ms=150, button_name="button"):
+class AsyncButton:
+    def __init__(self, pin_number, callback=None, debounce_ms=100, button_name="button"):
         self.pin = Pin(pin_number, Pin.IN, Pin.PULL_UP)
         self.callback = callback
-        self.debounce_time_ms = debounce_time_ms
+        self.debounce_ms = debounce_ms
         self.button_name = button_name
-        self.last_press_time = 0
-        self.pending_press = False
+        self._last_press_time = 0
+        self._flag = asyncio.ThreadSafeFlag()
 
-        # Attach interrupt
         self.pin.irq(trigger=Pin.IRQ_FALLING, handler=self._irq_handler)
+        asyncio.create_task(self._debounce_task())
 
     def _irq_handler(self, pin):
-        """Minimal work in IRQ: just note that a press happened."""
-        current_time = time.ticks_ms()
-        if time.ticks_diff(current_time, self.last_press_time) > self.debounce_time_ms:
-            self.last_press_time = current_time
-            self.pending_press = True  # Flag for main loop
+        now = time.ticks_ms()
+        if time.ticks_diff(now, self._last_press_time) > self.debounce_ms:
+            self._last_press_time = now
+            self._flag.set()
 
-    def poll(self):
-        """Call this periodically from main loop."""
-        if self.pending_press:
-            self.pending_press = False
-            if self.callback:
+    async def _debounce_task(self):
+        while True:
+            await self._flag.wait()
+            await asyncio.sleep_ms(self.debounce_ms)
+            if self.pin.value() == 0 and self.callback:
                 self.callback(self.button_name)
 
-
-# Example usage
-def button_callback(pressed_buttons):
-    print(f"Buttons pressed: {pressed_buttons}")
-
-# Example usage
-def button_callback(pressed_buttons):
-    if len(pressed_buttons) == 1:
-        print(f"Button {pressed_buttons[0]} pressed")
-    else:
-        print(f"Multiple buttons pressed: {', '.join(pressed_buttons)}")
-
-# Example usage
-def button_callback(button_id):
-    print(f"Callback triggered by button: {button_id}")
+def on_button(name):
+    print("Pressed:", name)
 
 if __name__ == "__main__":
-
-  # Create the ButtonInput instance with the callback function
-  print("getting ready to test button input")
-  b1 = ButtonInput(callback=button_callback, button_name="test_button", pin_number=15)
-
-  # Keep the script running to allow event handling
-  import time
-  while True:
-      time.sleep(0.05)
-      b1.poll()
+    print("Async button demo started")
+    loop = asyncio.get_event_loop()
+    loop.close()
+    
+    AsyncButton(15, callback=on_button, button_name="test_button")
+    
+    loop.run_forever()
