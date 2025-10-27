@@ -12,6 +12,8 @@ class TempSensor(object):
   def __init__(self, callback=None):
     self.log = logging.getLogger('TempSensor')
     self.log.info("starting...")
+    ## 26 for the Garage one, because the pin is broke
+    ##ow = OneWire(Pin(26, Pin.IN, Pin.PULL_UP))
     ow = OneWire(Pin(22, Pin.IN, Pin.PULL_UP))
 
     self.auto_report = True
@@ -133,14 +135,3 @@ if __name__ == "__main__":
   sensor = TempSensor(my_callback)
   
   loop.run_forever()
-
-
-
-
-
-
-
-
-
-
-
