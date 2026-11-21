@@ -18,12 +18,15 @@ relay1.value(1)
 time.sleep(3)
 relay2.value(1)
 
+off_delays = (5, 10, 15, 25)
+delay_index = 0
 while True:
     #time.sleep(10)  # Wait for 19 minutes
-    time.sleep(19 * 60)  # Wait for 19 minutes
+    time.sleep(5 * 60)  # Wait for 5 minutes
     print('Turning off relay 2')
     relay2.value(0)  # Turn off relay 2
-    time.sleep(30)  # Keep it off for 1 minute
+    time.sleep(off_delays[delay_index])
+    delay_index = (delay_index + 1) % len(off_delays)
     # time.sleep(1)  # Keep it off for 1 minute
     print('Turning on relay 2')
     relay2.value(1)  # Turn relay 2 back on
