@@ -1,18 +1,1 @@
-
-{"wifi_password": "1029384756abc", 
-"wifi_ssid": "BTWholeHome-CJW", 
-"host": "192.168.2.231", 
-"port": "2345", 
-"client_name": "NONE"}
-
-
-
-
-
-
-
-
-
-
-
-
+{"client_name": "pico-button-box", "host": "192.168.2.231", "port": "2345", "wifi_ssid": "BTWholeHome-CJW", "wifi_password": "1029384756abc", "screen28": "False", "zone": "None", "mode": "None", "auto_report": "True"}

@@ -15,6 +15,7 @@ from status import Status
 import sys
 import utime
 from machine import Pin
+from button_input import AsyncButton
 
 
 import logging
@@ -63,15 +64,24 @@ class ButtonBox:
     self.log.info('TCP Client')
     self.client = TcpClient(self.text_received, self.status_update, self.cb)
 
+    AsyncButton(17, callback=self.press, button_name="Boost1")
+    AsyncButton(16, callback=self.press, button_name="Boost2")
+    AsyncButton(14, callback=self.press, button_name="Off1")
+    AsyncButton(15, callback=self.press, button_name="Off2")
 
     self.loop = asyncio.get_event_loop()
   
   def press(self, p):
     print('Button pressed!! ', p)
-   
+    if self.client.connected:
+      self.client.send(f'Handling ButtonPress {p}\n')
+      zone = "Downstairs" if "1" in p else "Upstairs"
+      action = "Boost" if "Boost" in p else "SetZoneOff"
+      print(f'{action} {zone}\n')
+      self.client.send(f'{action} {zone}\n')
+
   def text_received(self, line):
     parts = line.split(' ')
-
      
     if(parts[0] == 'ACK'):
       return
@@ -81,7 +91,7 @@ class ButtonBox:
     # self.log.debug('Line: ' + str(parts))
     
     if(parts[0] == 'Update'):
-        self.log.debug('update display now')
+        print('update display now')
         # self.log.debug(parts)
         zone = parts[1]
         on_off = parts[2]
@@ -93,13 +103,13 @@ class ButtonBox:
         else:
           return
 
+        pin_value = 0
         if on_off == "On":
-          self.log.info(f'{zone} heating is ON')
-          Pin(pin, Pin.OUT).value(1)
-        else:
-          self.log.info(f'{zone} heating is OFF')
-          Pin(pin, Pin.OUT).value(0)
-
+          pin_value = 1
+        
+        print(f'{zone} heating is {on_off} pin {pin} value {pin_value}')
+        Pin(pin, Pin.OUT).value(pin_value)
+        
         print(f'Update command for zone {zone} to {on_off}')
 
   def status_update(self, wifi_connected, client_connected, ip):

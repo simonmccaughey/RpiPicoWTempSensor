@@ -3,6 +3,9 @@ sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
 #sta_if.ifconfig(('0.0.0.0', '0.0.0.0', '0.0.0.0', '0.0.0.0'))
 sta_if.connect('BTWholeHome-CJW', '1029384756abc')
+# sta_if.connect('TP-Link', '1029384756abc')
+
+#sta_if.connect('1stDunboe', '1029384756')
 sta_if.isconnected()
 sta_if.ifconfig()
 
